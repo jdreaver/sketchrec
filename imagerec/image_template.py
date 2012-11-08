@@ -14,14 +14,14 @@ class ImageTemplate(Template):
     strokes, and the distance transform computed from said rasterized points
     """
     
-    def __init__(self, strokes, timestamps = None, dim=48):
+    def __init__(self, strokes, name="NO LABEL", timestamps = None, dim=48):
         points = np.array([point  for stroke in strokes for point in stroke])
         (grid, dmap, r_points) = distance_map(points, dim)
         self.grid = grid
         self.distance_map = dmap
         self.rasterized_points = r_points
         self.dimension = dim
-        super(ImageTemplate, self).__init__(strokes, timestamps)
+        super(ImageTemplate, self).__init__(strokes, name, timestamps)
 
 
 # ImageTemplate initialization functions.
@@ -50,7 +50,7 @@ def distance_map(points, dim=48):
         inflated = inflate_points(centered, dim)
     grid = np.zeros([dim, dim])
     for point in inflated:
-        grid[point[0]][point[1]] = 1
+        grid[point[0],point[1]] = 1
     dist_map = ndimage.morphology.distance_transform_edt(1 - grid)
     return (grid, dist_map, inflated.astype(int))
         

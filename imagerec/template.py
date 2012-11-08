@@ -2,9 +2,10 @@ class Template(object):
     """
     """
     
-    def __init__(self, strokes, timestamps=None):
+    def __init__(self, strokes, name="NO LABEL", timestamps=None):
         self.strokes = strokes
         self.points = [p for s in strokes for p in s]
+        self.name = name
         self.timestamps = timestamps
         
     def is_single_stroke(self):
