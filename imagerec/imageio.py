@@ -18,7 +18,7 @@ def single_stroke_unlabeled_file(path):
                 (x, y, a, b, c, time) = map(int, f.readline().split('\t'))
                 stroke.append([x,y])
                 timestamps.append(time)
-            templates.append(Template([stroke], [timestamps]))
+            templates.append(Template([stroke], timestamps=[timestamps]))
     return templates
 
 def templates_from_file(path):

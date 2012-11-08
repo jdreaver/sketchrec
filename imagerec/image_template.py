@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from template import Template
+from utilities import bounding_box
 
 """ 
 This file contains the definition for an ImageTemplate as well as
@@ -25,12 +26,6 @@ class ImageTemplate(Template):
 
 
 # ImageTemplate initialization functions.
-
-def bounding_box(points):
-    min_x, min_y = np.min(points, axis=0)
-    max_x, max_y = np.max(points, axis=0)
-    return np.array([(min_x, min_y), (max_x, min_y), 
-                     (max_x, max_y), (min_x, max_y)])
 
 def inflate_points(points, min_box_dim=48):
     bbox = bounding_box(points)
