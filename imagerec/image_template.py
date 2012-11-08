@@ -10,9 +10,11 @@ the distance between two templates.
 
 class ImageTemplate(Template):
     """
+    An image template contains a rasterized set of the template's
+    strokes, and the distance transform computed from said rasterized points
     """
     
-    def __init__(self, strokes, timestamps = [], dim=48):
+    def __init__(self, strokes, timestamps = None, dim=48):
         points = np.array([point  for stroke in strokes for point in stroke])
         (grid, dmap, r_points) = distance_map(points, dim)
         self.grid = grid
