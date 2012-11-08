@@ -18,10 +18,11 @@ class ImageTemplate(Template):
         self.grid = grid
         self.distance_map = dmap
         self.rasterized_points = r_points
+        self.dimension = dim
         super(ImageTemplate, self).__init__(strokes, timestamps)
 
 
-
+# ImageTemplate initialization functions.
 
 def bounding_box(points):
     min_x, min_y = np.min(points, axis=0)
@@ -51,3 +52,19 @@ def distance_map(points, dim=48):
     dist_map = ndimage.morphology.distance_transform_edt(1 - grid)
     return (grid, dist_map, inflated.astype(int))
         
+# Distance functions
+
+def mod_hauss_distance(i_tempA, i_tempB):
+    assert i_tempA.dimension == i_tempB.dimension
+
+    directed_distances = [0.0, 0.0]
+    for i, (temp1, temp2) in enumerate([(i_tempA, i_tempB), (i_tempB, i_tempA)]):
+        sum = 0.0
+        for p in temp1.rasterized_points:
+            sum += temp2.distance_map[p[0], p[1]]
+        directed_distances[i] = sum/len(temp1.rasterized_points)
+    
+    return np.max(directed_distances) / (np.sqrt(2) * i_tempA.dimension)
+    
+
+    
