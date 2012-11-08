@@ -1,8 +1,13 @@
 from sketchrec.imagerec import image_template
+import numpy as np
 
+degen1 = [[[1,-1]]]
+nowidth = [[[1,1], [0,1]]]
 single = [[[1,2], [5,6]]]
 dubs = [[[1,2],[3,4]], [[5,6],[7,8]]]
 
+temp_d1 = image_template.ImageTemplate(degen1, dim=47)
+temp_nw = image_template.ImageTemplate(nowidth, dim=48)
 temp_s = image_template.ImageTemplate(single, dim=6)
 temp_d = image_template.ImageTemplate(dubs, dim=6)
 
@@ -18,8 +23,8 @@ def basics_tests():
     assert temp_s.name == "NO LABEL"
     temp_d.name = "TEST NAME"
     assert temp_d.name == "TEST NAME"
-    assert temp_d.points == [[1,2], [3,4], [5,6], [7,8]]
-    assert temp_s.points == [[1,2], [5,6]]
+    assert np.array_equal(temp_d.points,[[1,2], [3,4], [5,6], [7,8]])
+    assert np.array_equal(temp_s.points, [[1,2], [5,6]])
     
 
 def distances_tests():

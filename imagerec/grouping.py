@@ -1,4 +1,4 @@
-from utilities import bounding_box, combine_boxes
+from utilities import bounding_box, box_height, box_width, combine_boxes
 import numpy as np
 
 def equation_lines(templates):
@@ -28,13 +28,16 @@ def equation_lines(templates):
         else:
             current_line.append(i)
     
+    lines.append(current_line)
     line_boxes = []
     for line in lines:
         line_boxes.append(combine_boxes([bounding_boxes[i] for i in line]))
     
     # Merge likely clusters
-    for i in range(1, len(lines)):
-        for j in range(i + 1, len(lines)):
+    i = 0
+    while i < len(lines):
+        j = i+1
+        while j < len(lines):
             (b1, b2) = (line_boxes[i], line_boxes[j])
             horiz_dist = np.min([b1[0, 0] - b2[1, 0], b2[0, 0] - b1[1, 0]])
             vert_dist = np.min([b1[0, 1] - b2[2, 1], b2[0, 1] - b1[2, 1]])
@@ -46,4 +49,32 @@ def equation_lines(templates):
                 line_boxes.pop(j)
                 lines.pop(j)
                 j -= 1
+            j += 1
+        i += 1
     return lines
+
+
+# Feature calculations
+
+def equation_stroke_widths(templates, equations):
+    """
+    Sets the width of a stroke to the max if it's actual width and
+    0.3 times the avg stroke height in the equation.
+    """
+    widths = np.zeros(len(templates))
+    boxes = np.array([bounding_box(t.points) for t in templates])
+    for line in equations:
+        avg_height = np.mean([box_height(boxes[i]) for i in line])
+        for i in line:
+            widths[i] = np.max([box_width(boxes[i]), avg_height * 0.3])
+    return widths
+        
+
+def compute_features_equation(templates):
+    lines = equation_lines(templates)
+    print np.max(lines), len(templates)
+    widths = equation_stroke_widths(templates, lines)
+    
+    # If two strokes are in the same equation and their widths overlap, then
+    # compute their features.
+    

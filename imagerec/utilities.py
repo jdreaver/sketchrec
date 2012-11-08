@@ -7,6 +7,13 @@ def bounding_box(points):
     return np.array([(min_x, min_y), (max_x, min_y), 
                      (max_x, max_y), (min_x, max_y)])
 
+def box_height(bounding_box):
+    return bounding_box[2,1] - bounding_box[0,1]
+
+def box_width(bounding_box):
+    return bounding_box[1,0] - bounding_box[0,0]
+
+
 def combine_boxes(boxes):
     """ Founds the bounding box for a set of bounding boxes."""
     (min_x, min_y) = np.min(boxes, axis=0)[0]
