@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from template import Template
-from utilities import bounding_box
+from utilities import bounding_box, box_width, box_height
 
 """ 
 This file contains the definition for an ImageTemplate as well as
@@ -32,11 +32,11 @@ def convert_to_image(template):
 
 def inflate_points(points, min_box_dim=48):
     bbox = bounding_box(points)
-    width = bbox[1][0] - bbox[0][0]
-    height = bbox[2][1] - bbox[1][1]
+    width = box_width(bbox)
+    height = box_height(bbox)
     moved = points - bbox[0]
     dim = min_box_dim - 1  # points must fit within 48x48 grid
-    inflation = np.min([dim/width, dim/height])
+    inflation = 1/np.max([width/dim, height/dim]) # 1/" prevents DivideByZero
     return np.array(map(lambda point: 
             np.dot(np.diag([inflation]*2), point), moved)).astype(int)
 
