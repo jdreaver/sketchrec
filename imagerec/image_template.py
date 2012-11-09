@@ -28,6 +28,11 @@ class ImageTemplate(Template):
 def convert_to_image(template):
     return ImageTemplate(template.strokes, template.name, template.timestamps)
 
+def multiple_to_image(templates):
+    return ImageTemplate([stroke for t in templates for stroke in t.strokes],
+                         [templates[0].name],
+                         [stamp for t in templates for stamp in t.timestamps])
+
 # ImageTemplate initialization functions.
 
 def inflate_points(points, min_box_dim=48):
@@ -66,5 +71,8 @@ def mod_hauss_distance(i_tempA, i_tempB):
     
     return np.max(directed_distances) / (np.sqrt(2) * i_tempA.dimension)
     
-
+def list_classification(unknown, training):
+    distances = [(mod_hauss_distance(unknown, t), label) for
+                 t in training]
+    return max(distances)
     

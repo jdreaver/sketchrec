@@ -1,5 +1,6 @@
 from utilities import *
 import numpy as np
+from collections import defaultdict
 
 def equation_lines(templates, bounding_boxes=None):
     """ 
@@ -117,4 +118,29 @@ def compute_features_equation(templates):
                                     templates[i], templates[j]))
     return features
                 
-    
+def groups_to_join_graph(groups):
+    """
+    Takes a set of groups and converts them to a graph. Ex:
+    1               \
+    2,3      ------- \   {1:[1], 2:[2, 3], 3:[2, 3], 4:[4, 5, 6] ...} 
+    4,5,6    ------- /
+    7               /
+    """
+    N = np.max(groups)
+    join_graph = defaultdict(list)
+    for group in groups:
+        for i in group:
+            join_graph[i] = group
+
+    # This assertion is to verify the integrity of the .grp files.
+    assert (len(join_graph) - 1) == max(np.max(np.array(groups)))
+    return join_graph
+
+def features_to_classifier_input(features, join_graph):
+    X, y = [], []
+    X = [f[2:] for f in features]
+    y = [1 if f[1] in join_graph[f[0]] else -1 for f in features]
+    return (X,y)
+
+
+
