@@ -1,7 +1,7 @@
-from utilities import bounding_box, box_height, box_width, combine_boxes
+from utilities import *
 import numpy as np
 
-def equation_lines(templates):
+def equation_lines(templates, bounding_boxes=None):
     """ 
     This functions produces a list of a list of ints which correspond
     to the equation lines of a set of templates from the same page.
@@ -10,9 +10,10 @@ def equation_lines(templates):
     distance_threshold = 300 # in pixels
     time_threshold = 3000    # in ms
     
-    bounding_boxes = [bounding_box(t.points) for t in templates]
-    avg_width = np.mean([bb[1, 0] - bb[0, 0] for bb in bounding_boxes])
-    avg_height = np.mean([bb[2, 1] - bb[0, 1] for bb in bounding_boxes])
+    if bounding_boxes is None:
+        bounding_boxes = [bounding_box(t.points) for t in templates]
+    avg_width = np.mean([box_width(bb) for bb in bounding_boxes])
+    avg_height = np.mean([box_height(bb) for bb in bounding_boxes])
 
     # Create initial clusters
     lines = []
@@ -56,25 +57,64 @@ def equation_lines(templates):
 
 # Feature calculations
 
-def equation_stroke_widths(templates, equations):
+def equation_stroke_widths(templates, equations, boxes):
     """
     Sets the width of a stroke to the max if it's actual width and
     0.3 times the avg stroke height in the equation.
     """
     widths = np.zeros(len(templates))
-    boxes = np.array([bounding_box(t.points) for t in templates])
+    
     for line in equations:
         avg_height = np.mean([box_height(boxes[i]) for i in line])
         for i in line:
             widths[i] = np.max([box_width(boxes[i]), avg_height * 0.3])
     return widths
-        
+
+def feature_calculation(i, j, temp1, temp2):
+    """
+    Computes the pairwise features between two strokes.
+    """
+    (points1, points2) = (temp1.points, temp2.points)
+    # Min and max pairwise point distances and centroid distance
+    distances = [np.linalg.norm(p1 - p2) 
+                 for p1 in points1 
+                 for p2 in points2]
+    min_distance = np.min(distances)
+    max_distance = np.max(distances)
+
+    (cent1, cent2) = (np.mean(points1, axis=0), np.mean(points2, axis=0))
+    centroid_distance = np.linalg.norm(cent1 - cent2)
+    
+    # Find overlap
+    boxes = [bounding_box(points1), bounding_box(points2)]
+    boxes = sorted(boxes, key=box_x)
+    horiz_overlap = box_width(boxes[0]) + box_x(boxes[0]) - box_x(boxes[1])
+    boxes = sorted(boxes, key=box_y)
+    vert_overlap = box_height(boxes[0]) + box_y(boxes[0]) - box_y(boxes[1])
+
+    time_gap = temp2.timestamps[0,0] - temp1.timestamps[-1,-1]
+
+    return (i, j, min_distance, max_distance, centroid_distance,
+            horiz_overlap, vert_overlap, time_gap)
+    
 
 def compute_features_equation(templates):
     lines = equation_lines(templates)
-    print np.max(lines), len(templates)
-    widths = equation_stroke_widths(templates, lines)
+    boxes = np.array([bounding_box(t.points) for t in templates])
+    widths = equation_stroke_widths(templates, lines, boxes)
     
-    # If two strokes are in the same equation and their widths overlap, then
-    # compute their features.
+    # If two strokes are in the same equation and their widths overlap,
+    # then compute their features.
+    
+    features = []
+    for line in lines:
+        for index, i in enumerate(line):
+            for j in line[index + 1:]:
+                vectors = sorted([(box_x(boxes[i]), widths[i]),  
+                                 (box_x(boxes[j]), widths[j])])
+                if vectors[1][0] - vectors[0][0] < vectors[0][1]:
+                    features.append(feature_calculation(i, j,
+                                    templates[i], templates[j]))
+    return features
+                
     
