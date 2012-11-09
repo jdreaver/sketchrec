@@ -25,6 +25,9 @@ class ImageTemplate(Template):
         super(ImageTemplate, self).__init__(strokes, name, timestamps)
 
 
+def convert_to_image(template):
+    return ImageTemplate(template.strokes, template.name, template.timestamps)
+
 # ImageTemplate initialization functions.
 
 def inflate_points(points, min_box_dim=48):
