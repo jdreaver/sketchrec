@@ -22,6 +22,11 @@ class ImageTemplate(Template):
         self.distance_map = dmap
         self.rasterized_points = r_points
         self.dimension = dim
+        # Following used for hausdorff distance
+        self.flat_map = dmap.flatten()
+        self.flat_points = np.array([dim*p[0] + p[1] for p in r_points])
+        self.num_r_points = len(r_points)
+        self.map_dict = dict(zip(range(dim*dim), self.flat_map))
         super(ImageTemplate, self).__init__(strokes, name, timestamps)
 
 
@@ -30,7 +35,7 @@ def convert_to_image(template):
 
 def multiple_to_image(templates):
     return ImageTemplate([stroke for t in templates for stroke in t.strokes],
-                         [templates[0].name],
+                         templates[0].name,
                          [stamp for t in templates for stamp in t.timestamps])
 
 # ImageTemplate initialization functions.
@@ -59,7 +64,7 @@ def distance_map(points, dim=48):
         
 # Distance functions
 
-def mod_hauss_distance(i_tempA, i_tempB):
+def old_mod_hauss_distance(i_tempA, i_tempB):
     assert i_tempA.dimension == i_tempB.dimension
 
     directed_distances = [0.0, 0.0]
@@ -71,8 +76,24 @@ def mod_hauss_distance(i_tempA, i_tempB):
     
     return np.max(directed_distances) / (np.sqrt(2) * i_tempA.dimension)
     
+def mod_hauss_distance(imageA, imageB):
+    d1 = np.sum(imageA.flat_map.take(imageB.flat_points))/imageB.num_r_points
+    d2 = np.sum(imageB.flat_map.take(imageA.flat_points))/imageA.num_r_points
+    return np.max([d1, d2])/(1.4142 * imageA.dimension)
+
+def old_list_classification(unknown, training):
+    distances = [(mod_hauss_distance(unknown, t), t.name) 
+                 for t in training]
+    return min(distances)[1]
+
 def list_classification(unknown, training):
-    distances = [(mod_hauss_distance(unknown, t), label) for
-                 t in training]
-    return max(distances)
+    min_dist = (1.0, 'ERROR')
+    u = unknown
+    for t in training:
+        d1 = np.sum(u.flat_map.take(t.flat_points))/t.num_r_points
+        d2 = np.sum(t.flat_map.take(u.flat_points))/u.num_r_points
+        d = np.max([d1, d2])/(1.4142 * u.dimension)
+        min_dist = min([min_dist, (d, t.name)])
+    return min_dist[1]
+
     

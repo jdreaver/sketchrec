@@ -93,6 +93,7 @@ def feature_calculation(i, j, temp1, temp2):
     boxes = sorted(boxes, key=box_y)
     vert_overlap = box_height(boxes[0]) + box_y(boxes[0]) - box_y(boxes[1])
 
+    # Simple time gap
     time_gap = temp2.timestamps[0,0] - temp1.timestamps[-1,-1]
 
     return (i, j, min_distance, max_distance, centroid_distance,
@@ -100,12 +101,15 @@ def feature_calculation(i, j, temp1, temp2):
     
 
 def compute_features_equation(templates):
+    """
+    If two strokes are in the same equation and their widths overlap,
+    then compute their features.
+    """
     lines = equation_lines(templates)
     boxes = np.array([bounding_box(t.points) for t in templates])
     widths = equation_stroke_widths(templates, lines, boxes)
     
-    # If two strokes are in the same equation and their widths overlap,
-    # then compute their features.
+    
     
     features = []
     for line in lines:
@@ -133,14 +137,26 @@ def groups_to_join_graph(groups):
             join_graph[i] = group
 
     # This assertion is to verify the integrity of the .grp files.
-    assert (len(join_graph) - 1) == max(np.max(np.array(groups)))
+    assert len(join_graph) == sum([len(g) for g in groups])
     return join_graph
+
+def join_graph_to_groups(join_graph):
+    return sorted([v for v in join_graph.values()])
 
 def features_to_classifier_input(features, join_graph):
     X, y = [], []
     X = [f[2:] for f in features]
     y = [1 if f[1] in join_graph[f[0]] else -1 for f in features]
     return (X,y)
+
+def clf_results_to_join_graph(raw_features, results, num_temps):
+    join_graph = dict((i, [i]) for i in range(num_temps))
+    for n, result in enumerate(results):
+        if result == 1:
+            (i, j) = raw_features[n][:2]
+            join_graph[j] = sorted(join_graph[j] + join_graph[i])
+            join_graph[i] = sorted(join_graph[i] + join_graph[j])
+    return join_graph_to_groups(join_graph)
 
 
 
