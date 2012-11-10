@@ -1,18 +1,21 @@
-import numpy as np
-from scipy import ndimage
-from template import Template
-from utilities import bounding_box, box_width, box_height
-
 """ 
 This file contains the definition for an ImageTemplate as well as
 all of the functions for creating an image template and finding
 the distance between two templates.
 """
 
+import numpy as np
+from scipy import ndimage
+from template import Template
+from utilities import bounding_box, box_width, box_height
+
 class ImageTemplate(Template):
     """
     An image template contains a rasterized set of the template's
-    strokes, and the distance transform computed from said rasterized points
+    strokes, and the distance transform computed from said rasterized
+    points. The distance map and rsaterized corrdinates are flattened
+    to we can more easily compute the hausdorff distance between two
+    templates.
     """
     
     def __init__(self, strokes, name="NO LABEL", timestamps = None, dim=48):
@@ -31,16 +34,24 @@ class ImageTemplate(Template):
 
 
 def convert_to_image(template):
+    """ Converts a standard template to an image template."""
     return ImageTemplate(template.strokes, template.name, template.timestamps)
 
 def multiple_to_image(templates):
+    """ Combines the strokes and timestamps of multiple templates into
+    a single image template. Assumes each stroke has the same name."""
     return ImageTemplate([stroke for t in templates for stroke in t.strokes],
-                         templates[0].name,
-                         [stamp for t in templates for stamp in t.timestamps])
+                         templates[0].name, 
+                         [stamp for t in templates for stamp
+                          in t.timestamps])
 
 # ImageTemplate initialization functions.
 
 def inflate_points(points, min_box_dim=48):
+    """
+    Takes a set of raw stroke points and scales them to a (default)
+    48x48 grid. The points are scaled with the aspect ratio intact.
+    """
     bbox = bounding_box(points)
     width = box_width(bbox)
     height = box_height(bbox)
@@ -51,49 +62,61 @@ def inflate_points(points, min_box_dim=48):
             np.dot(np.diag([inflation]*2), point), moved)).astype(int)
 
 def distance_map(points, dim=48):
+    """
+    Given a binary grid of points, we compute the distance map. Any
+    point on the distance map encodes that point's distance to the
+    nearest rsaterized point.
+    """
     if len(points) == 1: 
         inflated = np.array(([dim/2, dim/2],))
     else:
-        centered = points - np.mean(points, axis=0) + np.array([24,24])
+        centered = points - np.mean(points, axis=0) + np.array([24, 24])
         inflated = inflate_points(centered, dim)
     grid = np.zeros([dim, dim])
     for point in inflated:
-        grid[point[0],point[1]] = 1
+        grid[point[0], point[1]] = 1
     dist_map = ndimage.morphology.distance_transform_edt(1 - grid)
     return (grid, dist_map, inflated.astype(int))
         
 # Distance functions
 
-def old_mod_hauss_distance(i_tempA, i_tempB):
-    assert i_tempA.dimension == i_tempB.dimension
-
-    directed_distances = [0.0, 0.0]
-    for i, (temp1, temp2) in enumerate([(i_tempA, i_tempB), (i_tempB, i_tempA)]):
-        sum = 0.0
-        for p in temp1.rasterized_points:
-            sum += temp2.distance_map[p[0], p[1]]
-        directed_distances[i] = sum/len(temp1.rasterized_points)
-    
-    return np.max(directed_distances) / (np.sqrt(2) * i_tempA.dimension)
-    
-def mod_hauss_distance(imageA, imageB):
-    d1 = np.sum(imageA.flat_map.take(imageB.flat_points))/imageB.num_r_points
-    d2 = np.sum(imageB.flat_map.take(imageA.flat_points))/imageA.num_r_points
-    return np.max([d1, d2])/(1.4142 * imageA.dimension)
-
-def old_list_classification(unknown, training):
-    distances = [(mod_hauss_distance(unknown, t), t.name) 
-                 for t in training]
-    return min(distances)[1]
-
 def list_classification(unknown, training):
+    """ 
+    Finds the closest training template to the unkown using the
+    modified hausdorff distance.
+    """
     min_dist = (1.0, 'ERROR')
-    u = unknown
-    for t in training:
-        d1 = np.sum(u.flat_map.take(t.flat_points))/t.num_r_points
-        d2 = np.sum(t.flat_map.take(u.flat_points))/u.num_r_points
-        d = np.max([d1, d2])/(1.4142 * u.dimension)
-        min_dist = min([min_dist, (d, t.name)])
+    for temp in training:
+        dist1 = np.sum(unknown.flat_map.take(
+                temp.flat_points))/temp.num_r_points
+        dist2 = np.sum(temp.flat_map.take(
+                unknown.flat_points))/unknown.num_r_points
+        dist = np.max([dist1, dist2])/(1.4142 * unknown.dimension)
+        min_dist = min([min_dist, (dist, temp.name)])
     return min_dist[1]
+
+# def old_mod_hauss_distance(imageA, imageB):
+#     assert imageA.dimension == imageB.dimension
+
+#     directed_distances = [0.0, 0.0]
+#     for i, (temp1, temp2) in enumerate([(imageA, imageB), (imageB, imageA)]):
+#         d_sum = 0.0
+#         for p in temp1.rasterized_points:
+#             d_sum += temp2.distance_map[p[0], p[1]]
+#         directed_distances[i] = d_sum/len(temp1.rasterized_points)
+    
+#     return np.max(directed_distances) / (np.sqrt(2) * imageA.dimension)
+    
+# def mod_hauss_distance(imageA, imageB):
+#     d1 = np.sum(imageA.flat_map.take(imageB.flat_points))/imageB.num_r_points
+#     d2 = np.sum(imageB.flat_map.take(imageA.flat_points))/imageA.num_r_points
+#     return np.max([d1, d2])/(1.4142 * imageA.dimension)
+
+# def old_list_classification(unknown, training):
+#     distances = [(mod_hauss_distance(unknown, t), t.name) 
+#                  for t in training]
+#     return min(distances)[1]
+
+
 
     

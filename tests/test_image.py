@@ -1,4 +1,4 @@
-from sketchrec.imagerec import image_template
+from sketchrec.imagerec import image_template, template
 import numpy as np
 
 degen1 = [[[1,-1]]]
@@ -9,6 +9,7 @@ dubs = [[[1,2],[3,4]], [[5,6],[7,8]]]
 temp_d1 = image_template.ImageTemplate(degen1, dim=47)
 temp_nw = image_template.ImageTemplate(nowidth, dim=48)
 temp_s = image_template.ImageTemplate(single, dim=6)
+temp_s.name = "temp_s"
 temp_d = image_template.ImageTemplate(dubs, dim=6)
 
 temp_dim = image_template.ImageTemplate(dubs, dim=5)
@@ -18,9 +19,16 @@ def inheritance_tests():
     assert temp_s.is_single_stroke() == True
     assert temp_d.is_single_stroke() == False
 
+def conversion_tests():
+    t = template.Template(dubs)
+    t_img = image_template.convert_to_image(t)
+    other_img = image_template.ImageTemplate(dubs)
+    assert all([np.array_equal(a, b) 
+                for a, b in zip(t_img.strokes, other_img.strokes)])
+
 def basics_tests():
     assert temp_dim.dimension != temp_s.dimension
-    assert temp_s.name == "NO LABEL"
+    assert temp_s.name == "temp_s"
     temp_d.name = "TEST NAME"
     assert temp_d.name == "TEST NAME"
     assert np.array_equal(temp_d.points,[[1,2], [3,4], [5,6], [7,8]])
@@ -30,5 +38,6 @@ def basics_tests():
 def distances_tests():
     hauss = image_template.mod_hauss_distance
     assert abs(hauss(temp_s, temp_d) - 0.125) < 0.0001
+    assert image_template.list_classification(temp_s, [temp_d, temp_s]) == "temp_s"
     
     

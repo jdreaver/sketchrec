@@ -55,9 +55,7 @@ def equation_lines(templates, bounding_boxes=None):
         i += 1
     return lines
 
-
 # Feature calculations
-
 def equation_stroke_widths(templates, equations, boxes):
     """
     Sets the width of a stroke to the max if it's actual width and
@@ -130,7 +128,6 @@ def groups_to_join_graph(groups):
     4,5,6    ------- /
     7               /
     """
-    N = np.max(groups)
     join_graph = defaultdict(list)
     for group in groups:
         for i in group:
