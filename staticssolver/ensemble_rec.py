@@ -8,7 +8,7 @@ from sketchrec.imagerec.grouping import clf_results_to_join_graph
 import numpy as np
 from sklearn import tree
 from collections import namedtuple
-#import sketchrec.imagrec.image_template
+from multiprocessing import Pool
 
 template_base = '/home/david/Dropbox/Research/Data/PencaseDataFix/'
 label_base = '/home/david/Dropbox/Research/Data/PenCaseLabels/'
@@ -28,7 +28,7 @@ def ensemble_rec():
     accuracies = []
     for i in range(len(pages)):
         test = pages[0]
-        train = pages[1:2]
+        train = pages[1:]
 
         num_temps = len(getattr(test, 'templates'))
 
@@ -60,15 +60,47 @@ def ensemble_rec():
 
     return accuracies
 
-def character_accuracy():
-    pass
+def character_rec(dim):
+    raw_files = load(template_base, label_base)
+    print "Building data"
+    pages = build_data(raw_files, dim)
+    
+    accuracies = []
+    for i in range(len(pages)):
+        test = pages[0]
+        train = pages[1:]
+        
+        num_temps = len(getattr(test, 'templates'))               
+        print i, "Classifiying"
+        train_images = [image for page in train 
+                        for image in getattr(page, 'imagetemps')
+                        if image.name != "NO LABEL"]
+        grouped_labels = [list_classification(t, train_images)
+                          for t in getattr(test, 'imagetemps')]
+        
+        #grouped_labels = map(lambda t: 
+        #                     list_classification(t, train_images),
+        #                     getattr(test, 'imagetemps'))
+        predicted_labels = distribute_labels(getattr(test, 'groups'),
+                                             grouped_labels,
+                                             num_temps)
+        
+        real_labels = getattr(test, 'labels')
+        
+        num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
+                            else 0.0
+                            for i in range(len(real_labels))])
+        accuracies.append(num_right/num_temps)
+        pages = pages[1:] + pages[:1]
+        
+    return accuracies
 
 # Utilites
-def group_image_templates(templates, groups):
+def group_image_templates(templates, groups, dim=48):
     grouped = []
     for group in groups:
         t_group = [templates[i] for i in group]
-        grouped.append(multiple_to_image(t_group))
+        grouped.append(multiple_to_image(t_group, dim))
     return grouped
                         
 def distribute_labels(groups, labels, num_temps):
@@ -79,7 +111,7 @@ def distribute_labels(groups, labels, num_temps):
     return dist_labels
         
 
-def build_data(raw_files):
+def build_data(raw_files, dim=48):
     """ 
     Takes the raw files and computes image templates, join_graphs, features.
     """
@@ -90,7 +122,7 @@ def build_data(raw_files):
             temp.name = labels[i]
         #print "Building file ", f[0], f[1], len(f[2])
         join_graph = groups_to_join_graph(f[3])
-        image_temps = group_image_templates(f[2], f[3])
+        image_temps = group_image_templates(f[2], f[3], dim)
         raw_features = compute_features_equation(f[2])
         (g_features, g_labels) = features_to_classifier_input(raw_features, 
                                                               join_graph)

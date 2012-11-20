@@ -33,17 +33,19 @@ class ImageTemplate(Template):
         super(ImageTemplate, self).__init__(strokes, name, timestamps)
 
 
-def convert_to_image(template):
+def convert_to_image(template, dim = 48):
     """ Converts a standard template to an image template."""
-    return ImageTemplate(template.strokes, template.name, template.timestamps)
+    return ImageTemplate(template.strokes, template.name, 
+                         template.timestamps, dim)
 
-def multiple_to_image(templates):
+def multiple_to_image(templates, dim = 48):
     """ Combines the strokes and timestamps of multiple templates into
     a single image template. Assumes each stroke has the same name."""
     return ImageTemplate([stroke for t in templates for stroke in t.strokes],
                          templates[0].name, 
                          [stamp for t in templates for stamp
-                          in t.timestamps])
+                          in t.timestamps],
+                         dim)
 
 # ImageTemplate initialization functions.
 
@@ -80,6 +82,20 @@ def distance_map(points, dim=48):
         
 # Distance functions
 
+def list_classification_old(unknown, training):
+    """ 
+    Finds the closest training template to the unkown using the
+    modified hausdorff distance.
+    """
+    min_dist = (1.0, 'ERROR')
+    for temp in training:
+        dis = np.zeros(2)
+        dis[0] = np.sum(unknown.flat_map.take(temp.flat_points))/temp.num_r_points
+        dis[1] = np.sum(temp.flat_map.take(unknown.flat_points))/unknown.num_r_points
+        dist = max(dis[0], dis[1])/(1.4142 * unknown.dimension)
+        min_dist = min([min_dist, (dist, temp.name)])
+    return min_dist[1]
+
 def list_classification(unknown, training):
     """ 
     Finds the closest training template to the unkown using the
@@ -87,12 +103,11 @@ def list_classification(unknown, training):
     """
     min_dist = (1.0, 'ERROR')
     for temp in training:
-        dist1 = np.sum(unknown.flat_map.take(
-                temp.flat_points))/temp.num_r_points
-        dist2 = np.sum(temp.flat_map.take(
-                unknown.flat_points))/unknown.num_r_points
-        dist = np.max([dist1, dist2])/(1.4142 * unknown.dimension)
+        dist = max(
+            np.sum(unknown.flat_map.take(temp.flat_points))/temp.num_r_points,
+            np.sum(temp.flat_map.take(unknown.flat_points))/unknown.num_r_points)
         min_dist = min([min_dist, (dist, temp.name)])
+    min_dist = (min_dist[0] / (1.4142 * unknown.dimension), min_dist[1])
     return min_dist[1]
 
 # def old_mod_hauss_distance(imageA, imageB):
@@ -107,10 +122,10 @@ def list_classification(unknown, training):
     
 #     return np.max(directed_distances) / (np.sqrt(2) * imageA.dimension)
     
-# def mod_hauss_distance(imageA, imageB):
-#     d1 = np.sum(imageA.flat_map.take(imageB.flat_points))/imageB.num_r_points
-#     d2 = np.sum(imageB.flat_map.take(imageA.flat_points))/imageA.num_r_points
-#     return np.max([d1, d2])/(1.4142 * imageA.dimension)
+def mod_hauss_distance(imageA, imageB):
+    d1 = np.sum(imageA.flat_map.take(imageB.flat_points))/imageB.num_r_points     
+    d2 = np.sum(imageB.flat_map.take(imageA.flat_points))/imageA.num_r_points
+    return np.max([d1, d2])/(1.4142 * imageA.dimension)
 
 # def old_list_classification(unknown, training):
 #     distances = [(mod_hauss_distance(unknown, t), t.name) 

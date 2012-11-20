@@ -1,6 +1,8 @@
 *.py[co]
 \#*
 *~
+*.lprof
+*.prof
 
 # Packages
 *.egg
