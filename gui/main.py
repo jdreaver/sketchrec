@@ -181,8 +181,6 @@ def zoom_factory(canvas, max_xlim, max_ylim, base_scale = 2.):
                      min(new_xlim[1], max_xlim[1])])
         ax.set_ylim([min(new_ylim[0], max_ylim[0]),
                      max(new_ylim[1], max_ylim[1])])
-
-        print ax.get_xlim(), ax.get_ylim()
         canvas.draw() # force re-draw
 
     fig = ax.get_figure() # get the figure of interest
