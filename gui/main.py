@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from mainGUI import Ui_StaticsRecGUI
 from sketchrec.imagerec import imageio
+#from ..imagerec import imageio
 from os.path import isfile
 
 class MainForm(QMainWindow):
@@ -19,7 +20,7 @@ class MainForm(QMainWindow):
         self.selected_strokes = []
         self.setupLabelViews()
         self.ui.btnLabelLoad.clicked.connect(self.load_raw_strokes_test)
-        self.zoom_fun = zoom_factory(self.ui.matplot.canvas, 1.5)
+        
         self.ui.btnLabel.clicked.connect(self.label_strokes)
         self.ui.labelList.itemSelectionChanged.connect(self.select_label)
 
@@ -46,6 +47,10 @@ class MainForm(QMainWindow):
             self.labels.append('NO LABEL')
         self.ui.matplot.canvas.ax.invert_yaxis()
         self.ui.matplot.canvas.draw()
+        self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
+        self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
+        self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
+                                     self.max_ylim, 1.5)
 
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -99,6 +104,10 @@ class MainForm(QMainWindow):
                 self.labels.append('NO LABEL')
             self.ui.matplot.canvas.ax.invert_yaxis()
             self.ui.matplot.canvas.draw()
+            self.max_xlim = self.matplot.canvas.ax.get_xlim()
+            self.max_ylim = self.matplot.canvas.ax.get_ylim()
+            self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
+                                         self.max_ylim, 1.5)
 
     def select_label(self):
         selected = self.ui.labelList.selectedItems()[0]
@@ -139,7 +148,7 @@ def reset_line_widths(lines):
     for line in lines:
         line.set_linewidth(1)
 
-def zoom_factory(canvas,base_scale = 2.):
+def zoom_factory(canvas, max_xlim, max_ylim, base_scale = 2.):
     ax = canvas.ax
     def zoom_fun(event):
         # get the current x and y limits
@@ -160,10 +169,20 @@ def zoom_factory(canvas,base_scale = 2.):
             scale_factor = 1
             print event.button
         # set new limits
-        ax.set_xlim([xdata - cur_xrange*scale_factor,
-                     xdata + cur_xrange*scale_factor])
-        ax.set_ylim([ydata - cur_yrange*scale_factor,
-                     ydata + cur_yrange*scale_factor])
+        #ax.set_xlim([xdata - cur_xrange*scale_factor,
+        #             xdata + cur_xrange*scale_factor])
+        #ax.set_ylim([ydata - cur_yrange*scale_factor,
+        #             ydata + cur_yrange*scale_factor])
+        new_xlim = [xdata - cur_xrange*scale_factor,
+                    xdata + cur_xrange*scale_factor]
+        new_ylim = [ydata - cur_yrange*scale_factor,
+                    ydata + cur_yrange*scale_factor]
+        ax.set_xlim([max(new_xlim[0], max_xlim[0]),
+                     min(new_xlim[1], max_xlim[1])])
+        ax.set_ylim([min(new_ylim[0], max_ylim[0]),
+                     max(new_ylim[1], max_ylim[1])])
+
+        print ax.get_xlim(), ax.get_ylim()
         canvas.draw() # force re-draw
 
     fig = ax.get_figure() # get the figure of interest

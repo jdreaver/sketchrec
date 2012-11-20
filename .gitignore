@@ -3,6 +3,7 @@
 *~
 *.lprof
 *.prof
+\.#*
 
 # Packages
 *.egg
