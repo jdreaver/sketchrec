@@ -5,7 +5,8 @@ from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationTo
 from mainGUI import Ui_StaticsRecGUI
 from sketchrec.imagerec import imageio
 #from ..imagerec import imageio
-from os.path import isfile
+from os.path import isfile, isdir, basename, dirname, splitext
+import os.path
 
 class MainForm(QMainWindow):
     def __init__(self, parent=None):
@@ -20,7 +21,7 @@ class MainForm(QMainWindow):
         self.selected_strokes = []
         self.setupLabelViews()
         self.ui.btnLabelLoad.clicked.connect(self.load_raw_strokes_test)
-        
+        self.ui.btnLabelSave.clicked.connect(self.save_labels)
         self.ui.btnLabel.clicked.connect(self.label_strokes)
         self.ui.labelList.itemSelectionChanged.connect(self.select_label)
 
@@ -34,7 +35,9 @@ class MainForm(QMainWindow):
 
     def load_raw_strokes_test(self):
         self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
-
+        self.pen = basename(dirname(self.labelFileName))
+        self.file_name = splitext(basename(self.labelFileName))[0]
+        print self.pen, self.file_name
         templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
         self.stroke_handles = []
         self.labels = []
@@ -51,6 +54,14 @@ class MainForm(QMainWindow):
         self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
         self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
                                      self.max_ylim, 1.5)
+
+    def save_labels(self):
+        dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        if isdir(dir_name):
+            out_base = os.path.join(dir_name, self.pen, self.file_name)
+            
+            label_out = '\n'.join(self.labels)
+            
 
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -90,8 +101,9 @@ class MainForm(QMainWindow):
         
     def load_raw_strokes(self):
         self.labelFileName = QFileDialog.getOpenFileName()
-        print self.labelFileName
         if isfile(self.labelFileName):
+            self.pen = basename(dirname(self.labelFileName))
+            self.file_name = splitext(basename(self.labelFileName))[0]
             templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
             self.stroke_handles = []
             self.labels = []
