@@ -211,8 +211,8 @@ def sparse_groups_to_groups(sparse_groups, num_strokes):
 def join_graph_to_groups(join_graph):
     
     """Strips the groupings from a join graph. """
-    
-    return sorted([v for v in join_graph.values()])
+    vals = sorted(list(set([tuple(v) for v in join_graph.values()])))
+    return [list(v) for v in vals]
 
 def features_to_classifier_input(features, join_graph):
     

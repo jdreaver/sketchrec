@@ -15,6 +15,11 @@ def basic_tests():
 
 def group_convert_test():
     groups = [[1], [2,3,4], [5], [6,8,9], [7]]
-    assert grouping.groups_to_join_graph(groups) == {1:[1], 2:[2, 3, 4], 3:[2, 3, 4],
-                                                     4:[2, 3, 4], 5:[5], 6:[6, 8, 9],
-                                                     7:[7], 8:[6, 8, 9], 9:[6, 8, 9]}
+    join_graph = grouping.groups_to_join_graph(groups)
+    assert  join_graph == {1:[1], 2:[2, 3, 4], 3:[2, 3, 4],
+                           4:[2, 3, 4], 5:[5], 6:[6, 8, 9],
+                           7:[7], 8:[6, 8, 9], 9:[6, 8, 9]}
+    new_groups = grouping.join_graph_to_groups(join_graph)
+    assert len(new_groups) == len(groups)
+    for g1, g2 in zip(new_groups, groups):
+        assert g1 == g2
