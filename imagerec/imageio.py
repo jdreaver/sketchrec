@@ -1,12 +1,17 @@
-import image_template
-import os
-from template import Template
-
 """
 This file contains the definitions for import/export functions.
 """
 
+import image_template
+import os
+from template import Template
+
 def single_stroke_unlabeled_file(path):
+    
+    """
+    Opens a raw file with single strokes and time stamps.
+    """
+    
     templates = []
     with open(path, 'r') as f:
         num_strokes = int(f.readline())
@@ -16,7 +21,7 @@ def single_stroke_unlabeled_file(path):
             num_points = int(f.readline().rstrip())
             for j in range(num_points):
                 (x, y, a, b, c, time) = map(int, f.readline().split('\t'))
-                stroke.append([x,y])
+                stroke.append([x, y])
                 timestamps.append(time)
             templates.append(Template([stroke], timestamps=[timestamps]))
     return templates
@@ -40,6 +45,11 @@ def templates_from_file(path):
 ## Static solver database I/O
 
 def load_group_file(path):
+
+    """
+    Loads the .grp file in path. Returns groups.
+    """
+    
     groups = []
     with open(path, 'r') as f:
         num_groups = int(f.readline())
@@ -48,6 +58,11 @@ def load_group_file(path):
     return groups
 
 def load_label_file(path):
+
+    """
+    Returns list of labels in the .lbl file from path.
+    """
+    
     labels = []
     with open(path, 'r') as f:
         num_labels = int(f.readline())
@@ -56,6 +71,11 @@ def load_label_file(path):
     return labels
 
 def get_labeled_filenames(label_base):
+    
+    """
+    Scans the database for all labeled file names.
+    """
+    
     labeled_files = []
     for root, dirs, files in os.walk(label_base, topdown=False):
         for f in [name for name in files if '.grp' in name]:
@@ -66,6 +86,11 @@ def get_labeled_filenames(label_base):
     return sorted(labeled_files)
 
 def load_all_label_files(template_base, label_base):
+
+    """
+    Returns all labeled files in database.
+    """
+    
     templates_by_file = []
     labeled_files = get_labeled_filenames(label_base)
     for (pen, f_name) in labeled_files:
