@@ -131,7 +131,7 @@ class MainForm(QMainWindow):
             for index in self.selected_strokes:
                 self.labels[index] = label
             if self.ui.rdbMultiStroke.isChecked():
-                self.groupings.append(self.selected_strokes)
+                self.add_group(self.selected_strokes)
             for i in range(self.ui.labelList.count()):
                 if str(self.ui.labelList.item(i).text()) == label:
                     item = self.ui.labelList.takeItem(i)
@@ -139,6 +139,14 @@ class MainForm(QMainWindow):
             self.ui.labelList.insertItem(0, label)
             self.ui.labelList.setCurrentRow(0)
             self.color_strokes()
+
+    def add_group(self, new_group):
+        for index in new_group:
+            for group in self.groupings:
+                if index in group:
+                    self.groupings.remove(group)
+        groupings.append(new_group)
+            
 
     def color_strokes(self):
         handles = self.stroke_handles

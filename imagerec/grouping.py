@@ -137,6 +137,13 @@ def groups_to_join_graph(groups):
     assert len(join_graph) == sum([len(g) for g in groups])
     return join_graph
 
+def sparse_groups_to_groups(sparse_groups):
+    """
+    [[2, 3, 4], [7, 8]] ----> [[1], [2, 3, 4], [5], [6], [7, 8]]
+    """
+    pass
+    
+
 def join_graph_to_groups(join_graph):
     return sorted([v for v in join_graph.values()])
 
