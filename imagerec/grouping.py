@@ -1,11 +1,30 @@
+"""
+This module contains the functions used for grouping strokes,
+computing equation lines, and converting the groupings between
+different data structures.
+"""
+
 from utilities import *
 import numpy as np
 from collections import defaultdict
 
 def equation_lines(templates, bounding_boxes=None):
+    
     """ 
-    This functions produces a list of a list of ints which correspond
-    to the equation lines of a set of templates from the same page.
+    Produces a list of equation lines.
+
+    This function is based off of Hanlung Lung's equation line finder.
+    First, initial clusters are made by combining combining
+    consecutive strokes that are less than distance_threshold away and
+    time_threshold apart. Then, those clusters are merged if the
+    distance between their bounding boxes is less than 3 times and
+    more than -1/2 times the average stroke bounding box width in the
+    x direction, and they have a vertical overlap of at least 2/3 the
+    average stroke height.
+
+    Keyword arguments:
+    templates -- usually raw templates from a user's file
+    bounding_boxes -- optionally pre-computed bounding boxes
     """
     
     distance_threshold = 300 # in pixels
@@ -57,9 +76,17 @@ def equation_lines(templates, bounding_boxes=None):
 
 # Feature calculations
 def equation_stroke_widths(templates, equations, boxes):
+    
     """
+    Computes modified bounding boxes for each stroke.
+    
     Sets the width of a stroke to the max if it's actual width and
     0.3 times the avg stroke height in the equation.
+
+    Keyword arguments:
+    templates -- usually raw templates from a user's file
+    equations -- list of list of ints representing equations
+    boxes -- bounding box for each stroke in templates
     """
     widths = np.zeros(len(templates))
     
@@ -70,9 +97,25 @@ def equation_stroke_widths(templates, equations, boxes):
     return widths
 
 def feature_calculation(i, j, temp1, temp2):
+    
     """
     Computes the pairwise features between two strokes.
+
+    We use 7 pairwise features for feature calculation:
+    1) Minimum distance between any two points in both strokes
+    2) Maximum distance between any two points in both strokes
+    3) Distance between both centroids
+    4) Horizontal overlap (negative if no overlap)
+    5) Vertical overlap (negative if no overlap)
+    6) Time gap
+
+    Keyword arguments:
+    i -- index of temp1
+    j -- index of temp2
+    temp1 -- template for first stroke
+    temp2 -- template for second stroke
     """
+    
     (points1, points2) = (temp1.points, temp2.points)
     # Min and max pairwise point distances and centroid distance
     distances = [np.linalg.norm(p1 - p2) 
@@ -92,22 +135,27 @@ def feature_calculation(i, j, temp1, temp2):
     vert_overlap = box_height(boxes[0]) + box_y(boxes[0]) - box_y(boxes[1])
 
     # Simple time gap
-    time_gap = temp2.timestamps[0,0] - temp1.timestamps[-1,-1]
+    time_gap = temp2.timestamps[0, 0] - temp1.timestamps[-1, -1]
 
     return (i, j, min_distance, max_distance, centroid_distance,
             horiz_overlap, vert_overlap, time_gap)
     
 
 def compute_features_equation(templates):
+    
     """
+    Computes features using equation line overlap.
+    
     If two strokes are in the same equation and their widths overlap,
     then compute their features.
+
+    Keyword arguments:
+    templates -- templates representing strokes from the same page
     """
+    
     lines = equation_lines(templates)
     boxes = np.array([bounding_box(t.points) for t in templates])
     widths = equation_stroke_widths(templates, lines, boxes)
-    
-    
     
     features = []
     for line in lines:
@@ -121,13 +169,20 @@ def compute_features_equation(templates):
     return features
                 
 def groups_to_join_graph(groups):
+    
     """
-    Takes a set of groups and converts them to a graph. Ex:
+    Takes a set of groups and converts them to a graph.
+
+    Ex:
     1               \
     2,3      ------- \   {1:[1], 2:[2, 3], 3:[2, 3], 4:[4, 5, 6] ...} 
     4,5,6    ------- /
     7               /
+
+    Keyword arguments:
+    groups -- list of list of all groupings (inc. single strokes)
     """
+    
     join_graph = defaultdict(list)
     for group in groups:
         for i in group:
@@ -137,23 +192,57 @@ def groups_to_join_graph(groups):
     assert len(join_graph) == sum([len(g) for g in groups])
     return join_graph
 
-def sparse_groups_to_groups(sparse_groups):
+def sparse_groups_to_groups(sparse_groups, num_strokes):
+    
     """
+    Converts a list of just multi-stroke groups to all groups.
+
+    Ex:
     [[2, 3, 4], [7, 8]] ----> [[1], [2, 3, 4], [5], [6], [7, 8]]
+
+    Keyword arguments:
+    sparse_groups -- set of groups without single-strokes
+    num_strokes -- number of templates (highest stroke index + 1)
     """
+    
     pass
     
 
 def join_graph_to_groups(join_graph):
+    
+    """Strips the groupings from a join graph. """
+    
     return sorted([v for v in join_graph.values()])
 
 def features_to_classifier_input(features, join_graph):
+    
+    """
+    Assigns class (join/no-join) to each set of features.
+
+    This function takes the join_graph info to assign a class to each
+    pairwise feature set.
+
+    Keyword arguments:
+    features -- pairwise features with strokes
+    indices join_graph -- dictionary that indicates which strokes
+    should be joined
+    """
+    
     X, y = [], []
     X = [f[2:] for f in features]
     y = [1 if f[1] in join_graph[f[0]] else -1 for f in features]
-    return (X,y)
+    return (X ,y)
 
 def clf_results_to_join_graph(raw_features, results, num_temps):
+
+    """
+    Takes class assignment of pairwise features and computes join_graph.
+
+    The pairwise grouping classifier returns a class for a pair of
+    strokes. This function takes those class assignments and computes
+    a join_graph.
+    """
+    
     join_graph = dict((i, [i]) for i in range(num_temps))
     for n, result in enumerate(results):
         if result == 1:
