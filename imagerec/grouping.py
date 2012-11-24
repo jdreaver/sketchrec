@@ -205,12 +205,27 @@ def sparse_groups_to_groups(sparse_groups, num_strokes):
     num_strokes -- number of templates (highest stroke index + 1)
     """
     
-    pass
+    is_grouped = dict([(i, -1) for i in range(num_strokes)])
+    for i, group in enumerate(sparse_groups):
+        group = sorted(group)
+        is_grouped[group[0]] = i
+        for i in group[1:]:
+            is_grouped[i] = -2
+    groupings = []
+    for i in range(num_strokes):
+        if is_grouped[i] == -1:
+            groupings.append([i])
+        elif is_grouped[i] >= 0:
+            groupings.append(sparse_groups[is_grouped[i]])
+
+    return groupings
+        
     
 
 def join_graph_to_groups(join_graph):
     
     """Strips the groupings from a join graph. """
+    
     vals = sorted(list(set([tuple(v) for v in join_graph.values()])))
     return [list(v) for v in vals]
 
@@ -250,6 +265,5 @@ def clf_results_to_join_graph(raw_features, results, num_temps):
             join_graph[j] = sorted(join_graph[j] + join_graph[i])
             join_graph[i] = sorted(join_graph[i] + join_graph[j])
     return join_graph_to_groups(join_graph)
-
 
 

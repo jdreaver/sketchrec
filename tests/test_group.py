@@ -23,3 +23,11 @@ def group_convert_test():
     assert len(new_groups) == len(groups)
     for g1, g2 in zip(new_groups, groups):
         assert g1 == g2
+
+    sparse_groups = [[2,3], [5, 7, 10], [8,11], [12, 13]]
+    all_groups = grouping.sparse_groups_to_groups(sparse_groups, 14)
+    real_all_groups = [[0], [1], [2, 3], [4], [5, 7, 10], [6], [8,11],
+                       [9], [12, 13]]
+    for g1, g2 in zip(all_groups, real_all_groups):
+        assert g1 == g2
+    
