@@ -24,6 +24,7 @@ class matplotlibwidget(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.canvas = MplCanvas()
+        self.canvas.ax.invert_yaxis()
         self.vbl = QtGui.QVBoxLayout()
         self.vbl.addWidget(self.canvas)
         self.setLayout(self.vbl)

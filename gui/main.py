@@ -3,8 +3,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from mainGUI import Ui_StaticsRecGUI
-from sketchrec.imagerec import imageio
-#from ..imagerec import imageio
+from sketchrec.imagerec import imageio, grouping
+import os
 from os.path import isfile, isdir, basename, dirname, splitext
 import os.path
 
@@ -20,7 +20,7 @@ class MainForm(QMainWindow):
         
         self.selected_strokes = []
         self.setupLabelViews()
-        self.ui.btnLabelLoad.clicked.connect(self.load_raw_strokes_test)
+        self.ui.btnLabelLoad.clicked.connect(self.load_raw_strokes)
         self.ui.btnLabelSave.clicked.connect(self.save_labels)
         self.ui.btnLabel.clicked.connect(self.label_strokes)
         self.ui.labelList.itemSelectionChanged.connect(self.select_label)
@@ -38,29 +38,63 @@ class MainForm(QMainWindow):
         self.pen = basename(dirname(self.labelFileName))
         self.file_name = splitext(basename(self.labelFileName))[0]
         print self.pen, self.file_name
-        templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
+        self.templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
+        self.num_temps = len(self.templates)
         self.stroke_handles = []
         self.labels = []
         self.groupings = []
-        for i, t in enumerate(templates):
+        for i, t in enumerate(self.templates):
             x,y = zip(*t.points)
             h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
             h.index = i;
             self.stroke_handles.append(h)
             self.labels.append('NO LABEL')
-        self.ui.matplot.canvas.ax.invert_yaxis()
         self.ui.matplot.canvas.draw()
         self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
         self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
         self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
                                      self.max_ylim, 1.5)
 
+    def load_raw_strokes(self):
+        self.labelFileName = str(QFileDialog.getOpenFileName())
+        if isfile(self.labelFileName):
+            self.pen = basename(dirname(self.labelFileName))
+            self.file_name = splitext(basename(self.labelFileName))[0]
+            self.templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
+            self.num_temps = len(self.templates)
+            self.stroke_handles = []
+            self.labels = []
+            self.groupings = []
+            for i, t in enumerate(self.templates):
+                x,y = zip(*t.points)
+                h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
+                h.index = i;
+                self.stroke_handles.append(h)
+                self.labels.append('NO LABEL')
+            self.ui.matplot.canvas.draw()
+            self.max_xlim = self.matplot.canvas.ax.get_xlim()
+            self.max_ylim = self.matplot.canvas.ax.get_ylim()
+            self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
+                                         self.max_ylim, 1.5)
+
     def save_labels(self):
         dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         if isdir(dir_name):
-            out_base = os.path.join(dir_name, self.pen, self.file_name)
+            base_dir = os.path.join(dir_name, self.pen)
+            if not os.path.exists(base_dir):
+                os.makedirs(base_dir)
+            out_base = os.path.join(base_dir, self.file_name)
             
             label_out = '\n'.join(self.labels)
+            label_file = out_base + '.lbl'
+            groups = grouping.sparse_groups_to_groups(self.groupings,
+                                                          self.num_temps)
+            groups_out = '\n'.join([' '.join(map(str, g)) for g in groups])
+            groups_file = out_base + '.grp'
+
+            open(label_file, 'w').write(label_out)
+            open(groups_file, 'w').write(groups_out)
+            
             
 
     def onpick(self, event):
@@ -72,7 +106,9 @@ class MainForm(QMainWindow):
             self.selected_strokes.append(thisline.index)
         else:
             self.selected_strokes = [thisline.index]
+    
         self.selected_strokes = list(set(self.selected_strokes))
+        self.selected_strokes = sorted(self.selected_strokes)
         self.ui.labelText.setText('Selected: ' +
                                   ', '.join(map(str, self.selected_strokes)))
 
@@ -99,27 +135,7 @@ class MainForm(QMainWindow):
                 listWidget = QListWidgetItem(self.ui.labelList)
                 listWidget.setText(subLabel)
         
-    def load_raw_strokes(self):
-        self.labelFileName = QFileDialog.getOpenFileName()
-        if isfile(self.labelFileName):
-            self.pen = basename(dirname(self.labelFileName))
-            self.file_name = splitext(basename(self.labelFileName))[0]
-            templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
-            self.stroke_handles = []
-            self.labels = []
-            self.groupings = []
-            for i, t in enumerate(templates):
-                x,y = zip(*t.points)
-                h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
-                h.index = i;
-                self.stroke_handles.append(h)
-                self.labels.append('NO LABEL')
-            self.ui.matplot.canvas.ax.invert_yaxis()
-            self.ui.matplot.canvas.draw()
-            self.max_xlim = self.matplot.canvas.ax.get_xlim()
-            self.max_ylim = self.matplot.canvas.ax.get_ylim()
-            self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
-                                         self.max_ylim, 1.5)
+    
 
     def select_label(self):
         selected = self.ui.labelList.selectedItems()[0]
@@ -145,7 +161,7 @@ class MainForm(QMainWindow):
             for group in self.groupings:
                 if index in group:
                     self.groupings.remove(group)
-        groupings.append(new_group)
+        self.groupings.append(new_group)
             
 
     def color_strokes(self):
