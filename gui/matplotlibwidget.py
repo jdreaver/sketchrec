@@ -16,7 +16,6 @@ class MplCanvas(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
                                    QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        
 
 
 class matplotlibwidget(QtGui.QWidget):
@@ -31,4 +30,12 @@ class matplotlibwidget(QtGui.QWidget):
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.vbl.addWidget(self.toolbar)
         self.canvas.ax.set_aspect('equal', 'datalim')
+
+        self.canvas.mpl_connect('button_press_event', self.onclick)
+
+    def onclick(self, event):
+        print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
+            event.button, event.x, event.y, event.xdata, event.ydata)
+        if event.button == 2:
+            self.toolbar.pan()
         

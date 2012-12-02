@@ -65,6 +65,7 @@ class MainForm(QMainWindow):
             self.stroke_handles = []
             self.labels = []
             self.groupings = []
+            self.ui.matplot.canvas.ax.clear()
             for i, t in enumerate(self.templates):
                 x,y = zip(*t.points)
                 h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
@@ -72,8 +73,8 @@ class MainForm(QMainWindow):
                 self.stroke_handles.append(h)
                 self.labels.append('NO LABEL')
             self.ui.matplot.canvas.draw()
-            self.max_xlim = self.matplot.canvas.ax.get_xlim()
-            self.max_ylim = self.matplot.canvas.ax.get_ylim()
+            self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
+            self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
             self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
                                          self.max_ylim, 1.5)
 
