@@ -122,14 +122,16 @@ class MainForm(QMainWindow):
         self.ui.labelTree.clear()
         labels = [('Digits','0123456789'), 
                   ('Alphas','AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz'),
-                  ('Operators', ('plus', 'minus', 'equals', 'divide', 'dot')),
-                  ('Misc', ('arrow', 'rparen', 'lparen', 'sigma')),
+                  ('Operators', ('plus', 'minus', 'equal', 'divide', 'dot')),
+                  ('Misc', ('arrow', 'rparen', 'lparen', 'sigma', 'circle', 'decimal')),
                   ('NO LABEL', ())]
         for top, sub in labels:
             topWidget = QTreeWidgetItem(self.ui.labelTree)
             topWidget.setText(0, top)
             topWidget.setCheckState(0, Qt.Checked)
             for subLabel in sub:
+                if subLabel.islower() and len(subLabel) == 1:
+                    subLabel += subLabel
                 labelWidget = QTreeWidgetItem(topWidget)
                 labelWidget.setText(0, subLabel)
                 labelWidget.setCheckState(0, Qt.Checked)
