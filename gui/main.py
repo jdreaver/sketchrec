@@ -1,7 +1,7 @@
 import sys 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+#from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from mainGUI import Ui_StaticsRecGUI
 from sketchrec.imagerec import imageio, grouping
 import os
@@ -32,6 +32,12 @@ class MainForm(QMainWindow):
         print 'GROUPS'
         for group in self.groupings:
             print group
+
+    def keyPressEvent(self, event):
+        if self.ui.lblCheckIncremental.checkState() == Qt.Checked:
+            key = event.key()
+            print event.text(), event.nativeModifiers(), event.count(), \
+            event.modifiers() == Qt.ControlModifier
 
     def load_raw_strokes_test(self):
         self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'

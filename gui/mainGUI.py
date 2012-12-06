@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainGUI.ui'
 #
-# Created: Mon Nov 19 19:28:08 2012
+# Created: Thu Dec  6 13:12:39 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,19 +62,19 @@ class Ui_StaticsRecGUI(object):
         self.rdbSingleStroke = QtGui.QRadioButton(self.gridLayoutWidget)
         self.rdbSingleStroke.setChecked(True)
         self.rdbSingleStroke.setObjectName(_fromUtf8("rdbSingleStroke"))
-        self.gridLayout.addWidget(self.rdbSingleStroke, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.rdbSingleStroke, 5, 0, 1, 1)
         self.rdbMultiStroke = QtGui.QRadioButton(self.gridLayoutWidget)
         self.rdbMultiStroke.setChecked(False)
         self.rdbMultiStroke.setObjectName(_fromUtf8("rdbMultiStroke"))
-        self.gridLayout.addWidget(self.rdbMultiStroke, 4, 1, 1, 1)
+        self.gridLayout.addWidget(self.rdbMultiStroke, 5, 1, 1, 1)
         self.labelTree = QtGui.QTreeWidget(self.gridLayoutWidget)
         self.labelTree.setColumnCount(1)
         self.labelTree.setObjectName(_fromUtf8("labelTree"))
         item_0 = QtGui.QTreeWidgetItem(self.labelTree)
-        self.gridLayout.addWidget(self.labelTree, 6, 0, 1, 2)
+        self.gridLayout.addWidget(self.labelTree, 7, 0, 1, 2)
         self.labelList = QtGui.QListWidget(self.gridLayoutWidget)
         self.labelList.setObjectName(_fromUtf8("labelList"))
-        self.gridLayout.addWidget(self.labelList, 5, 0, 1, 2)
+        self.gridLayout.addWidget(self.labelList, 6, 0, 1, 2)
         self.labelText = QtGui.QLabel(self.gridLayoutWidget)
         self.labelText.setLineWidth(1)
         self.labelText.setObjectName(_fromUtf8("labelText"))
@@ -82,6 +82,9 @@ class Ui_StaticsRecGUI(object):
         self.btnLabelSave = QtGui.QPushButton(self.gridLayoutWidget)
         self.btnLabelSave.setObjectName(_fromUtf8("btnLabelSave"))
         self.gridLayout.addWidget(self.btnLabelSave, 2, 0, 1, 1)
+        self.lblCheckIncremental = QtGui.QCheckBox(self.gridLayoutWidget)
+        self.lblCheckIncremental.setObjectName(_fromUtf8("lblCheckIncremental"))
+        self.gridLayout.addWidget(self.lblCheckIncremental, 4, 0, 1, 1)
         self.tabWidget.addTab(self.labelerTab, _fromUtf8(""))
         self.dataTab = QtGui.QWidget()
         self.dataTab.setObjectName(_fromUtf8("dataTab"))
@@ -120,6 +123,7 @@ class Ui_StaticsRecGUI(object):
         self.labelTree.setSortingEnabled(__sortingEnabled)
         self.labelText.setText(QtGui.QApplication.translate("StaticsRecGUI", "Selected:", None, QtGui.QApplication.UnicodeUTF8))
         self.btnLabelSave.setText(QtGui.QApplication.translate("StaticsRecGUI", "Save...", None, QtGui.QApplication.UnicodeUTF8))
+        self.lblCheckIncremental.setText(QtGui.QApplication.translate("StaticsRecGUI", "Incremental", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.labelerTab), QtGui.QApplication.translate("StaticsRecGUI", "Labeler", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dataTab), QtGui.QApplication.translate("StaticsRecGUI", "Data Viewer", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Unlabeled.setText(QtGui.QApplication.translate("StaticsRecGUI", "Load Unlabeled", None, QtGui.QApplication.UnicodeUTF8))
