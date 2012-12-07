@@ -66,29 +66,8 @@ class MainForm(QMainWindow):
                 self.selected_strokes = [self.selected_strokes[-1] + 1]
             self.update_selected_strokes()
 
-    def load_raw_strokes_test(self):
-        self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
-        self.pen = basename(dirname(self.labelFileName))
-        self.file_name = splitext(basename(self.labelFileName))[0]
-        print self.pen, self.file_name
-        self.templates = imageio.single_stroke_unlabeled_file(self.labelFileName)
-        self.num_temps = len(self.templates)
-        self.stroke_handles = []
-        self.labels = []
-        self.groupings = []
-        for i, t in enumerate(self.templates):
-            x,y = zip(*t.points)
-            h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
-            h.index = i;
-            self.stroke_handles.append(h)
-            self.labels.append('NO LABEL')
-        self.ui.matplot.canvas.draw()
-        self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
-        self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
-        self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
-                                     self.max_ylim, 1.5)
-
     def load_raw_strokes(self):
+        #self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
         self.labelFileName = str(QFileDialog.getOpenFileName())
         if isfile(self.labelFileName):
             self.pen = basename(dirname(self.labelFileName))
