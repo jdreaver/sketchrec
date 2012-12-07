@@ -126,7 +126,10 @@ def list_classification(unknown, training):
     min_dist = (min_dist[0] / (1.4142 * unknown.dimension), min_dist[1])
     return min_dist[1]
 
-
+def group_centroid(templates):
+    points = []
+    [points.extend(template.points) for template in templates]
+    return np.mean(points, axis=0)
 
 
     

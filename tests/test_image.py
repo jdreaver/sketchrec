@@ -33,6 +33,8 @@ def basics_tests():
     assert temp_d.name == "TEST NAME"
     assert np.array_equal(temp_d.points,[[1,2], [3,4], [5,6], [7,8]])
     assert np.array_equal(temp_s.points, [[1,2], [5,6]])
+    assert np.array_equal([1.6, 1.8], image_template.group_centroid(
+        [temp_d1, temp_nw, temp_s]))
     
 
 def distances_tests():
