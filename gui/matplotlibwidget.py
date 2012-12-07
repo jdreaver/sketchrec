@@ -1,4 +1,5 @@
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QTAgg as NavigationToolbar)
@@ -32,6 +33,8 @@ class matplotlibwidget(QtGui.QWidget):
         self.canvas.ax.set_aspect('equal', 'datalim')
 
         self.canvas.mpl_connect('button_press_event', self.onclick)
+
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
 
     def onclick(self, event):
         print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(

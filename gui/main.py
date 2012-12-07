@@ -19,11 +19,13 @@ class MainForm(QMainWindow):
         self.ui.matplot.canvas.mpl_connect('pick_event', self.onpick)
         
         self.selected_strokes = []
+        self.stroke_handles = []
         self.setupLabelViews()
         self.ui.btnLabelLoad.clicked.connect(self.load_raw_strokes)
         self.ui.btnLabelSave.clicked.connect(self.save_labels)
-        self.ui.btnLabel.clicked.connect(self.label_strokes)
+        self.ui.btnLabel.clicked.connect(self.label_button)
         self.ui.labelList.itemSelectionChanged.connect(self.select_label)
+        self.ui.lblCheckIncremental.stateChanged.connect(self.begin_incremental)
 
     def TEST_METHOD(self):
         print 'LABELS'
@@ -33,11 +35,36 @@ class MainForm(QMainWindow):
         for group in self.groupings:
             print group
 
+    def begin_incremental(self, event):
+        if self.stroke_handles and \
+               self.ui.lblCheckIncremental.checkState() == Qt.Checked:
+                # Find first unlabeled stroke:
+                for j, label in enumerate(self.labels):
+                    if label == "NO LABEL":
+                        self.selected_strokes = [j]
+                        break
+                self.update_selected_strokes()
+
     def keyPressEvent(self, event):
-        if self.ui.lblCheckIncremental.checkState() == Qt.Checked:
+        if self.ui.lblCheckIncremental.checkState() == Qt.Checked and \
+           self.stroke_handles:
+            
             key = event.key()
-            print event.text(), event.nativeModifiers(), event.count(), \
-            event.modifiers() == Qt.ControlModifier
+            key_string = str(event.text())
+            print key, key_string
+            if key == Qt.Key_Space and self.selected_strokes[0] < self.num_temps:
+                self.selected_strokes = [self.selected_strokes[0] + 1]
+            elif key == Qt.Key_Backspace and self.selected_strokes[0] > 0:
+                self.selected_strokes = [self.selected_strokes[0] - 1]
+            elif key == Qt.Key_Right and self.selected_strokes[-1] < self.num_temps:
+                self.selected_strokes.append(self.selected_strokes[-1] + 1)
+            elif key == Qt.Key_Left and len(self.selected_strokes) > 1:
+                self.selected_strokes.pop()
+            elif key_string in key_to_label.keys():
+                bool_grouped = True if len(self.selected_strokes) > 1 else False
+                self.label_strokes(key_to_label[key_string], bool_grouped)
+                self.selected_strokes = [self.selected_strokes[-1] + 1]
+            self.update_selected_strokes()
 
     def load_raw_strokes_test(self):
         self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
@@ -116,12 +143,16 @@ class MainForm(QMainWindow):
     
         self.selected_strokes = list(set(self.selected_strokes))
         self.selected_strokes = sorted(self.selected_strokes)
+        
+        self.update_selected_strokes()
+
+    def update_selected_strokes(self):
         self.ui.labelText.setText('Selected: ' +
                                   ', '.join(map(str, self.selected_strokes)))
-
         reset_line_widths(self.stroke_handles)
         for i in self.selected_strokes:
             self.stroke_handles[i].set_linewidth(3)
+            
         self.ui.matplot.canvas.draw()
 
     def setupLabelViews(self):
@@ -150,25 +181,31 @@ class MainForm(QMainWindow):
         selected = self.ui.labelList.selectedItems()[0]
         self.ui.labelLineEdit.setText(selected.text())
 
-    def label_strokes(self):
+    def label_button(self):
         label = str(self.ui.labelLineEdit.text()).rstrip()
         if label != '' and self.selected_strokes != []:
-            for index in self.selected_strokes:
-                self.labels[index] = label
-            if self.ui.rdbMultiStroke.isChecked():
-                self.add_group(self.selected_strokes)
-            for i in range(self.ui.labelList.count()):
-                if str(self.ui.labelList.item(i).text()) == label:
-                    item = self.ui.labelList.takeItem(i)
-                    break
-            self.ui.labelList.insertItem(0, label)
-            self.ui.labelList.setCurrentRow(0)
-            self.color_strokes()
+            bool_grouped = True if self.ui.rdbMultiStroke.isChecked() else False
+            self.label_strokes(label, bool_grouped)
 
+    def label_strokes(self, label, bool_grouped):
+        if bool_grouped:
+            self.add_group(self.selected_strokes)
+        for index in self.selected_strokes:
+            self.labels[index] = label
+        for i in range(self.ui.labelList.count()):
+            if str(self.ui.labelList.item(i).text()) == label:
+                item = self.ui.labelList.takeItem(i)
+                break
+        self.ui.labelList.insertItem(0, label)
+        self.ui.labelList.setCurrentRow(0)
+        self.color_strokes()
+            
     def add_group(self, new_group):
         for index in new_group:
             for group in self.groupings:
                 if index in group:
+                    for g in group:
+                        self.labels[g] = "NO LABEL"
                     self.groupings.remove(group)
         self.groupings.append(new_group)
             
@@ -234,6 +271,25 @@ def zoom_factory(canvas, max_xlim, max_ylim, base_scale = 2.):
 
     #return the function
     return zoom_fun
+
+key_to_label = {'+':'plus',
+                '-':'minus',
+                '=':'equals',
+                '(':'lparen',
+                ')':'rparen',
+                '.':'decimal',
+                '<':'arrow',
+                '>':'arrow',
+                '@':'circle',
+                '*':'dot',
+                '!':'sigma'}
+
+for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+    key_to_label[letter] = letter
+    key_to_label[letter.lower()] = 2*letter.lower()
+for num in '01234567890':
+    key_to_label[num] = num
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
