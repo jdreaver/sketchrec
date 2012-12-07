@@ -86,6 +86,7 @@ class MainForm(QMainWindow):
         ax.set_xlim(new_xlim)
         ax.set_ylim(new_ylim)
         self.ui.matplot.canvas.draw() # force re-draw
+        
 
     def load_raw_strokes(self):
         #self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
