@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainGUI.ui'
 #
-# Created: Thu Dec  6 13:12:39 2012
+# Created: Fri Dec  7 11:33:45 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -85,6 +85,9 @@ class Ui_StaticsRecGUI(object):
         self.lblCheckIncremental = QtGui.QCheckBox(self.gridLayoutWidget)
         self.lblCheckIncremental.setObjectName(_fromUtf8("lblCheckIncremental"))
         self.gridLayout.addWidget(self.lblCheckIncremental, 4, 0, 1, 1)
+        self.lblCheckIncFollow = QtGui.QCheckBox(self.gridLayoutWidget)
+        self.lblCheckIncFollow.setObjectName(_fromUtf8("lblCheckIncFollow"))
+        self.gridLayout.addWidget(self.lblCheckIncFollow, 4, 1, 1, 1)
         self.tabWidget.addTab(self.labelerTab, _fromUtf8(""))
         self.dataTab = QtGui.QWidget()
         self.dataTab.setObjectName(_fromUtf8("dataTab"))
@@ -124,6 +127,7 @@ class Ui_StaticsRecGUI(object):
         self.labelText.setText(QtGui.QApplication.translate("StaticsRecGUI", "Selected:", None, QtGui.QApplication.UnicodeUTF8))
         self.btnLabelSave.setText(QtGui.QApplication.translate("StaticsRecGUI", "Save...", None, QtGui.QApplication.UnicodeUTF8))
         self.lblCheckIncremental.setText(QtGui.QApplication.translate("StaticsRecGUI", "Incremental", None, QtGui.QApplication.UnicodeUTF8))
+        self.lblCheckIncFollow.setText(QtGui.QApplication.translate("StaticsRecGUI", "Incr. Follow", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.labelerTab), QtGui.QApplication.translate("StaticsRecGUI", "Labeler", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dataTab), QtGui.QApplication.translate("StaticsRecGUI", "Data Viewer", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Unlabeled.setText(QtGui.QApplication.translate("StaticsRecGUI", "Load Unlabeled", None, QtGui.QApplication.UnicodeUTF8))
