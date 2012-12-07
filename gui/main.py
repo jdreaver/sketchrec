@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 #from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from mainGUI import Ui_StaticsRecGUI
 from sketchrec.imagerec import imageio, grouping
+from sketchrec.imagerec.image_template import group_centroid
 import os
 from os.path import isfile, isdir, basename, dirname, splitext
 import os.path
@@ -48,7 +49,6 @@ class MainForm(QMainWindow):
     def keyPressEvent(self, event):
         if self.ui.lblCheckIncremental.checkState() == Qt.Checked and \
            self.stroke_handles:
-            
             key = event.key()
             key_string = str(event.text())
             print key, key_string
@@ -65,6 +65,27 @@ class MainForm(QMainWindow):
                 self.label_strokes(key_to_label[key_string], bool_grouped)
                 self.selected_strokes = [self.selected_strokes[-1] + 1]
             self.update_selected_strokes()
+            if self.ui.lblCheckIncFollow.isChecked() and self.selected_strokes:
+                self.recenter_axes_on_selected()
+
+    def recenter_axes_on_selected(self):
+        ax = self.ui.matplot.canvas.ax
+        cur_xlim = ax.get_xlim()
+        cur_ylim = ax.get_ylim()
+        cur_xrange = (cur_xlim[1] - cur_xlim[0])*.5
+        cur_yrange = (cur_ylim[1] - cur_ylim[0])*.5
+        templates = [self.templates[i] for i in self.selected_strokes]
+        centroid = group_centroid(templates)
+        xdata = centroid[0]
+        ydata = centroid[1]
+        # set new limits
+        new_xlim = [xdata - cur_xrange,
+                    xdata + cur_xrange]
+        new_ylim = [ydata - cur_yrange,
+                    ydata + cur_yrange]
+        ax.set_xlim(new_xlim)
+        ax.set_ylim(new_ylim)
+        self.ui.matplot.canvas.draw() # force re-draw
 
     def load_raw_strokes(self):
         #self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
@@ -108,8 +129,6 @@ class MainForm(QMainWindow):
             open(label_file, 'w').write(label_out)
             open(groups_file, 'w').write(groups_out)
             
-            
-
     def onpick(self, event):
         if event.mouseevent.button != 1:
             return 0
@@ -154,8 +173,6 @@ class MainForm(QMainWindow):
                 listWidget = QListWidgetItem(self.ui.labelList)
                 listWidget.setText(subLabel)
         
-    
-
     def select_label(self):
         selected = self.ui.labelList.selectedItems()[0]
         self.ui.labelLineEdit.setText(selected.text())
