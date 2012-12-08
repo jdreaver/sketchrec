@@ -278,7 +278,10 @@ key_to_label = {'+':'plus',
                 '>':'arrow',
                 '@':'circle',
                 '*':'dot',
-                '!':'sigma'}
+                '!':'sigma',
+                '&':'ampersand',
+                '[':'box',
+                '{':'squigglebox'}
 
 for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
     key_to_label[letter] = letter
