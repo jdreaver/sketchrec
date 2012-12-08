@@ -206,8 +206,6 @@ class MainForm(QMainWindow):
                         self.labels[g] = "NO LABEL"
                     self.groupings.remove(group)
         
-            
-
     def color_strokes(self):
         handles = self.stroke_handles
         for i, label in enumerate(self.labels):
@@ -223,7 +221,6 @@ class MainForm(QMainWindow):
             j += 1
         self.ui.matplot.canvas.draw()
             
-
 def reset_line_widths(lines):
     for line in lines:
         line.set_linewidth(1)
