@@ -185,8 +185,9 @@ class MainForm(QMainWindow):
             self.label_strokes(label, bool_grouped)
 
     def label_strokes(self, label, bool_grouped):
-        if bool_grouped:
-            self.add_group(self.selected_strokes)
+        self.remove_from_groups(self.selected_strokes)
+        if bool_grouped and len(self.selected_strokes) > 1:
+            self.groupings.append(self.selected_strokes)
         for index in self.selected_strokes:
             self.labels[index] = label
         for i in range(self.ui.labelList.count()):
@@ -196,15 +197,15 @@ class MainForm(QMainWindow):
         self.ui.labelList.insertItem(0, label)
         self.ui.labelList.setCurrentRow(0)
         self.color_strokes()
-            
-    def add_group(self, new_group):
+
+    def remove_from_groups(self, new_group):
         for index in new_group:
             for group in self.groupings:
                 if index in group:
                     for g in group:
                         self.labels[g] = "NO LABEL"
                     self.groupings.remove(group)
-        self.groupings.append(new_group)
+        
             
 
     def color_strokes(self):
