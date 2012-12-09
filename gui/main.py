@@ -120,11 +120,12 @@ class MainForm(QMainWindow):
                 os.makedirs(base_dir)
             out_base = os.path.join(base_dir, self.file_name)
             
-            label_out = '\n'.join(self.labels)
+            label_out = str(len(self.labels)) + '\n' + '\n'.join(self.labels)
             label_file = out_base + '.lbl'
             groups = grouping.sparse_groups_to_groups(self.groupings,
                                                           self.num_temps)
-            groups_out = '\n'.join([' '.join(map(str, g)) for g in groups])
+            groups_out = str(len(groups)) + '\n' + \
+                         '\n'.join([' '.join(map(str, g)) for g in groups])
             groups_file = out_base + '.grp'
 
             open(label_file, 'w').write(label_out)
