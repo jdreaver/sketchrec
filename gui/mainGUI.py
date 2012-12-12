@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainGUI.ui'
 #
-# Created: Wed Dec 12 12:23:40 2012
+# Created: Wed Dec 12 14:41:44 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,6 +71,7 @@ class Ui_StaticsRecGUI(object):
         self.labelTree.setColumnCount(1)
         self.labelTree.setObjectName(_fromUtf8("labelTree"))
         item_0 = QtGui.QTreeWidgetItem(self.labelTree)
+        self.labelTree.header().setVisible(True)
         self.gridLayout.addWidget(self.labelTree, 7, 0, 1, 2)
         self.labelList = QtGui.QListWidget(self.gridLayoutWidget)
         self.labelList.setObjectName(_fromUtf8("labelList"))
@@ -140,7 +141,7 @@ class Ui_StaticsRecGUI(object):
         self.actionSave_Unlabeled.setObjectName(_fromUtf8("actionSave_Unlabeled"))
 
         self.retranslateUi(StaticsRecGUI)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(StaticsRecGUI)
 
     def retranslateUi(self, StaticsRecGUI):
@@ -150,7 +151,7 @@ class Ui_StaticsRecGUI(object):
         self.btnLabel.setText(QtGui.QApplication.translate("StaticsRecGUI", "Label:", None, QtGui.QApplication.UnicodeUTF8))
         self.rdbSingleStroke.setText(QtGui.QApplication.translate("StaticsRecGUI", "Single Strokes", None, QtGui.QApplication.UnicodeUTF8))
         self.rdbMultiStroke.setText(QtGui.QApplication.translate("StaticsRecGUI", "Multi-Stroke", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelTree.headerItem().setText(0, QtGui.QApplication.translate("StaticsRecGUI", "Labels", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTree.headerItem().setText(0, QtGui.QApplication.translate("StaticsRecGUI", "Colored Labels", None, QtGui.QApplication.UnicodeUTF8))
         __sortingEnabled = self.labelTree.isSortingEnabled()
         self.labelTree.setSortingEnabled(False)
         self.labelTree.topLevelItem(0).setText(0, QtGui.QApplication.translate("StaticsRecGUI", "Test", None, QtGui.QApplication.UnicodeUTF8))

@@ -111,9 +111,12 @@
            <property name="columnCount">
             <number>1</number>
            </property>
+           <attribute name="headerVisible">
+            <bool>true</bool>
+           </attribute>
            <column>
             <property name="text">
-             <string>Labels</string>
+             <string>Colored Labels</string>
             </property>
            </column>
            <item>
