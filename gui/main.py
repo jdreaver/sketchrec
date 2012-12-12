@@ -1,7 +1,6 @@
 import sys 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-#from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from mainGUI import Ui_StaticsRecGUI
 from sketchrec.imagerec import imageio, grouping
 from sketchrec.imagerec.image_template import group_centroid
@@ -175,6 +174,13 @@ class MainForm(QMainWindow):
                 labelWidget.setCheckState(0, Qt.Checked)
                 listWidget = QListWidgetItem(self.ui.labelList)
                 listWidget.setText(subLabel)
+        self.ui.labelTree.itemChanged.connect(self.label_tree_item_changed)
+                
+    def label_tree_item_changed(self, widget_item, column):
+        checked = widget_item.checkState(0)
+        [widget_item.child(i).setCheckState(0, checked) for i
+         in range(widget_item.childCount())]
+            
         
     def select_label(self):
         selected = self.ui.labelList.selectedItems()[0]

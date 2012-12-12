@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainGUI.ui'
 #
-# Created: Fri Dec  7 11:33:45 2012
+# Created: Wed Dec 12 12:23:40 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,7 +42,7 @@ class Ui_StaticsRecGUI(object):
         self.labelerTab = QtGui.QWidget()
         self.labelerTab.setObjectName(_fromUtf8("labelerTab"))
         self.gridLayoutWidget = QtGui.QWidget(self.labelerTab)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, 263, 651))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 10, 281, 651))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setMargin(0)
@@ -91,6 +91,37 @@ class Ui_StaticsRecGUI(object):
         self.tabWidget.addTab(self.labelerTab, _fromUtf8(""))
         self.dataTab = QtGui.QWidget()
         self.dataTab.setObjectName(_fromUtf8("dataTab"))
+        self.gridLayoutWidget_2 = QtGui.QWidget(self.dataTab)
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(9, 9, 281, 651))
+        self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
+        self.gridLayout_2 = QtGui.QGridLayout(self.gridLayoutWidget_2)
+        self.gridLayout_2.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+        self.gridLayout_2.setMargin(0)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.label = QtGui.QLabel(self.gridLayoutWidget_2)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout_2.addWidget(self.label, 0, 0, 1, 1)
+        self.dataLabelLocation = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.dataLabelLocation.setObjectName(_fromUtf8("dataLabelLocation"))
+        self.gridLayout_2.addWidget(self.dataLabelLocation, 3, 0, 1, 2)
+        self.dataRawLocation = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.dataRawLocation.setObjectName(_fromUtf8("dataRawLocation"))
+        self.gridLayout_2.addWidget(self.dataRawLocation, 1, 0, 1, 2)
+        self.label_2 = QtGui.QLabel(self.gridLayoutWidget_2)
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.gridLayout_2.addWidget(self.label_2, 2, 0, 1, 1)
+        self.dataBtnRawBrowse_2 = QtGui.QPushButton(self.gridLayoutWidget_2)
+        self.dataBtnRawBrowse_2.setObjectName(_fromUtf8("dataBtnRawBrowse_2"))
+        self.gridLayout_2.addWidget(self.dataBtnRawBrowse_2, 2, 1, 1, 1)
+        self.dataBtnRawBrowse = QtGui.QPushButton(self.gridLayoutWidget_2)
+        self.dataBtnRawBrowse.setObjectName(_fromUtf8("dataBtnRawBrowse"))
+        self.gridLayout_2.addWidget(self.dataBtnRawBrowse, 0, 1, 1, 1)
+        self.dataComboSelector = QtGui.QComboBox(self.gridLayoutWidget_2)
+        self.dataComboSelector.setObjectName(_fromUtf8("dataComboSelector"))
+        self.gridLayout_2.addWidget(self.dataComboSelector, 5, 0, 1, 2)
+        self.label_3 = QtGui.QLabel(self.gridLayoutWidget_2)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout_2.addWidget(self.label_3, 4, 0, 1, 1)
         self.tabWidget.addTab(self.dataTab, _fromUtf8(""))
         self.horizontalLayout.addWidget(self.tabWidget)
         StaticsRecGUI.setCentralWidget(self.centralwidget)
@@ -109,7 +140,7 @@ class Ui_StaticsRecGUI(object):
         self.actionSave_Unlabeled.setObjectName(_fromUtf8("actionSave_Unlabeled"))
 
         self.retranslateUi(StaticsRecGUI)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(StaticsRecGUI)
 
     def retranslateUi(self, StaticsRecGUI):
@@ -129,6 +160,13 @@ class Ui_StaticsRecGUI(object):
         self.lblCheckIncremental.setText(QtGui.QApplication.translate("StaticsRecGUI", "Incremental", None, QtGui.QApplication.UnicodeUTF8))
         self.lblCheckIncFollow.setText(QtGui.QApplication.translate("StaticsRecGUI", "Incr. Follow", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.labelerTab), QtGui.QApplication.translate("StaticsRecGUI", "Labeler", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("StaticsRecGUI", "Raw Directory:", None, QtGui.QApplication.UnicodeUTF8))
+        self.dataLabelLocation.setText(QtGui.QApplication.translate("StaticsRecGUI", "/home/david/Dropbox/Research/Data/PenCaseLabels/", None, QtGui.QApplication.UnicodeUTF8))
+        self.dataRawLocation.setText(QtGui.QApplication.translate("StaticsRecGUI", "/home/david/Dropbox/Research/Data/PencaseDataFix/", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("StaticsRecGUI", "Labels Directory:", None, QtGui.QApplication.UnicodeUTF8))
+        self.dataBtnRawBrowse_2.setText(QtGui.QApplication.translate("StaticsRecGUI", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.dataBtnRawBrowse.setText(QtGui.QApplication.translate("StaticsRecGUI", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("StaticsRecGUI", "Current File:", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dataTab), QtGui.QApplication.translate("StaticsRecGUI", "Data Viewer", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Unlabeled.setText(QtGui.QApplication.translate("StaticsRecGUI", "Load Unlabeled", None, QtGui.QApplication.UnicodeUTF8))
         self.btnLoadLabel.setText(QtGui.QApplication.translate("StaticsRecGUI", "Load Labeled", None, QtGui.QApplication.UnicodeUTF8))
