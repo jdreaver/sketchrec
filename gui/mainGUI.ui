@@ -106,26 +106,6 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="0" colspan="2">
-          <widget class="QTreeWidget" name="labelTree">
-           <property name="columnCount">
-            <number>1</number>
-           </property>
-           <attribute name="headerVisible">
-            <bool>true</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>Colored Labels</string>
-            </property>
-           </column>
-           <item>
-            <property name="text">
-             <string>Test</string>
-            </property>
-           </item>
-          </widget>
-         </item>
          <item row="6" column="0" colspan="2">
           <widget class="QListWidget" name="labelList"/>
          </item>
@@ -180,17 +160,17 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Raw Directory:</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0" colspan="2">
           <widget class="QLineEdit" name="dataLabelLocation">
            <property name="text">
             <string>/home/david/Dropbox/Research/Data/PenCaseLabels/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Raw Directory:</string>
            </property>
           </widget>
          </item>
@@ -209,7 +189,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QPushButton" name="dataBtnRawBrowse_2">
+          <widget class="QPushButton" name="dataBtnLabelBrowse">
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -229,6 +209,33 @@
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>Current File:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0" colspan="2">
+          <widget class="QTreeWidget" name="labelTree">
+           <property name="columnCount">
+            <number>1</number>
+           </property>
+           <attribute name="headerVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Colored Labels</string>
+            </property>
+           </column>
+           <item>
+            <property name="text">
+             <string>Test</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QPushButton" name="dataBtnRefreshFiles">
+           <property name="text">
+            <string>Refresh</string>
            </property>
           </widget>
          </item>

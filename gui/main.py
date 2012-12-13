@@ -27,6 +27,10 @@ class MainForm(QMainWindow):
         self.ui.labelList.itemSelectionChanged.connect(self.select_label)
         self.ui.lblCheckIncremental.stateChanged.connect(self.begin_incremental)
 
+        self.ui.dataBtnRawBrowse.clicked.connect(self.browse_raw_directory)
+        self.ui.dataBtnLabelBrowse.clicked.connect(self.browse_label_directory)
+        self.ui.dataBtnRefreshFiles.clicked.connect(self.load_labeled_files)
+
     def TEST_METHOD(self):
         print 'LABELS'
         for i, a in enumerate(self.labels):
@@ -110,6 +114,19 @@ class MainForm(QMainWindow):
             self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
             self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
                                          self.max_ylim, 1.5)
+
+    def browse_raw_directory(self):
+        dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        if isdir(dir_name):
+            self.ui.dataRawLocation.setText(dir_name)
+
+    def browse_label_directory(self):
+        dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        if isdir(dir_name):
+            self.ui.dataLabelLocation.setText(dir_name)
+
+    def load_labeled_files(self):
+        print "REFRESH"
 
     def save_labels(self):
         dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
