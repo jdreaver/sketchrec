@@ -8,6 +8,7 @@ from mainGUI import Ui_StaticsRecGUI
 
 from sketchrec import imageio, grouping
 from sketchrec.image_template import group_centroid
+from sketchrec.imageio import get_labeled_filenames
 
 class MainForm(QMainWindow):
     def __init__(self, parent=None):
@@ -127,7 +128,9 @@ class MainForm(QMainWindow):
             self.ui.dataLabelLocation.setText(dir_name)
 
     def load_labeled_files(self):
-        print "REFRESH"
+        files = get_labeled_filenames(str(self.ui.dataLabelLocation.text()))
+        for pen, name in files:
+            self.ui.dataComboSelector.addItem(pen + ' ' + name)
 
     def save_labels(self):
         dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
