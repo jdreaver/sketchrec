@@ -1,14 +1,15 @@
-from sketchrec.imagerec.imageio import load_all_label_files as load
-from sketchrec.imagerec.image_template import multiple_to_image
-from sketchrec.imagerec.image_template import list_classification
-from sketchrec.imagerec.grouping import compute_features_equation
-from sketchrec.imagerec.grouping import groups_to_join_graph
-from sketchrec.imagerec.grouping import features_to_classifier_input
-from sketchrec.imagerec.grouping import clf_results_to_join_graph
 import numpy as np
 from sklearn import tree
 from collections import namedtuple
-from multiprocessing import Pool
+#from multiprocessing import Pool
+
+from sketchrec.imageio import load_all_label_files as load
+from sketchrec.image_template import multiple_to_image
+from sketchrec.image_template import list_classification
+from sketchrec.grouping import compute_features_equation
+from sketchrec.grouping import groups_to_join_graph
+from sketchrec.grouping import features_to_classifier_input
+from sketchrec.grouping import clf_results_to_join_graph
 
 template_base = '/home/david/Dropbox/Research/Data/PencaseDataFix/'
 label_base = '/home/david/Dropbox/Research/Data/PenCaseLabels/'
@@ -17,7 +18,7 @@ FileInfo = namedtuple('fileinfo', ['pen', 'filename', 'templates', 'groups',
                                    'labels', 'join_graph', 'imagetemps',    
                                    'raw_grouping_features', 
                                    'grouping_features', 'grouping_labels'])
-                                   
+                             
 # Ensemble schemes
 
 def ensemble_rec():

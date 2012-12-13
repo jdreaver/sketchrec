@@ -2,9 +2,8 @@
 This file contains the definitions for import/export functions.
 """
 
-import image_template
 import os
-from template import Template
+from sketchrec.template import Template
 
 def single_stroke_unlabeled_file(path):
     

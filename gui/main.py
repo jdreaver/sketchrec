@@ -1,12 +1,13 @@
-import sys 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from mainGUI import Ui_StaticsRecGUI
-from sketchrec.imagerec import imageio, grouping
-from sketchrec.imagerec.image_template import group_centroid
+import sys
 import os
 from os.path import isfile, isdir, basename, dirname, splitext
 import os.path
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from mainGUI import Ui_StaticsRecGUI
+
+from sketchrec import imageio, grouping
+from sketchrec.image_template import group_centroid
 
 class MainForm(QMainWindow):
     def __init__(self, parent=None):

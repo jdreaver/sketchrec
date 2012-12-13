@@ -6,8 +6,8 @@ the distance between two templates.
 
 import numpy as np
 from scipy import ndimage
-from template import Template
-from utilities import bounding_box, box_width, box_height
+from sketchrec.template import Template
+from sketchrec.utilities import bounding_box, box_width, box_height
 
 class ImageTemplate(Template):
     

@@ -3,10 +3,7 @@ Contains extra functions for any other file. For now, jsut has
 bounding boxes.
 """
 
-
 import numpy as np
-from itertools import tee, izip
-
 
 # Bounding Boxes
 
@@ -37,9 +34,3 @@ def combine_boxes(boxes):
     (max_x, max_y) = np.max(boxes, axis=0)[0]
     return np.array([(min_x, min_y), (max_x, min_y), 
                      (max_x, max_y), (min_x, max_y)])
-
-## def pairwise(iterable):
-##     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-##     a, b = tee(iterable)
-##     next(b, None)
-##     return izip(a, b)

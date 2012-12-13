@@ -1,4 +1,4 @@
-from sketchrec.imagerec import imageio
+from sketchrec import imageio
 
 temp_file = 'tests/test_page.iv'
 grp_file = 'tests/test_page.grp'

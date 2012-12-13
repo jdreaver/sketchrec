@@ -4,9 +4,10 @@ computing equation lines, and converting the groupings between
 different data structures.
 """
 
-from utilities import *
 import numpy as np
 from collections import defaultdict
+
+from utilities import *
 
 def equation_lines(templates, bounding_boxes=None):
     

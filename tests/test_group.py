@@ -1,4 +1,4 @@
-from sketchrec.imagerec import grouping, imageio
+from sketchrec import grouping, imageio
 import numpy as np
 
 temp_file = 'tests/test_page.iv'

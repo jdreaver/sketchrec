@@ -1,4 +1,4 @@
-from sketchrec.imagerec import image_template, template
+from sketchrec import image_template, template
 import numpy as np
 
 degen1 = [[[1,-1]]]
