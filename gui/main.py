@@ -145,7 +145,7 @@ class MainForm(QMainWindow):
             groups = grouping.sparse_groups_to_groups(self.groupings,
                                                           self.num_temps)
             groups_out = str(len(groups)) + '\n' + \
-                         '\n'.join([' '.join(map(str, g)) for g in groups])
+                         '\n'.join(['\t'.join(map(str, g)) for g in groups])
             groups_file = out_base + '.grp'
 
             open(label_file, 'w').write(label_out)
