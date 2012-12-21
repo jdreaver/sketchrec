@@ -1,14 +1,16 @@
 import sys
 import os
-from os.path import isfile, isdir, basename, dirname, splitext
 import os.path
+from os.path import isfile, isdir, basename, dirname, splitext
+import shutil
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from mainGUI import Ui_StaticsRecGUI
 
+from mainGUI import Ui_StaticsRecGUI
 from sketchrec import imageio, grouping
 from sketchrec.image_template import group_centroid
 from sketchrec.imageio import get_labeled_filenames
+from sketchrec.pagedata import PageData
 
 class MainForm(QMainWindow):
     def __init__(self, parent=None):
@@ -35,17 +37,17 @@ class MainForm(QMainWindow):
 
     def TEST_METHOD(self):
         print 'LABELS'
-        for i, a in enumerate(self.labels):
+        for i, a in enumerate(self.current_page.labels):
             print i, a
         print 'GROUPS'
-        for group in self.groupings:
+        for group in self.current_page.groups:
             print group
 
     def begin_incremental(self, event):
         if self.stroke_handles and \
                self.ui.lblCheckIncremental.checkState() == Qt.Checked:
                 # Find first unlabeled stroke:
-                for j, label in enumerate(self.labels):
+                for j, label in enumerate(self.current_page.labels):
                     if label == "NO LABEL":
                         self.selected_strokes = [j]
                         break
@@ -57,11 +59,13 @@ class MainForm(QMainWindow):
             key = event.key()
             key_string = str(event.text())
             print key, key_string
-            if key == Qt.Key_Space and self.selected_strokes[0] < self.num_temps:
+            if key == Qt.Key_Space and (self.selected_strokes[0] <
+                                        self.current_page.num_temps):
                 self.selected_strokes = [self.selected_strokes[0] + 1]
             elif key == Qt.Key_Backspace and self.selected_strokes[0] > 0:
                 self.selected_strokes = [self.selected_strokes[0] - 1]
-            elif key == Qt.Key_Right and self.selected_strokes[-1] < self.num_temps:
+            elif key == Qt.Key_Right and (self.selected_strokes[-1] <
+                                          self.current_page.num_temps):
                 self.selected_strokes.append(self.selected_strokes[-1] + 1)
             elif key == Qt.Key_Left and len(self.selected_strokes) > 1:
                 self.selected_strokes.pop()
@@ -79,7 +83,7 @@ class MainForm(QMainWindow):
         cur_ylim = ax.get_ylim()
         cur_xrange = (cur_xlim[1] - cur_xlim[0])*.5
         cur_yrange = (cur_ylim[1] - cur_ylim[0])*.5
-        templates = [self.templates[i] for i in self.selected_strokes]
+        templates = [self.current_page.templates[i] for i in self.selected_strokes]
         centroid = group_centroid(templates)
         xdata = centroid[0]
         ydata = centroid[1]
@@ -92,8 +96,28 @@ class MainForm(QMainWindow):
         ax.set_ylim(new_ylim)
         self.ui.matplot.canvas.draw() # force re-draw
         
-
     def load_raw_strokes(self):
+        label_filename = str(QFileDialog.getOpenFileName())
+        if isfile(label_filename):
+            self.current_page = PageData(label_filename, labeled=False)
+            self.plot_page()
+            
+
+    def plot_page(self):
+        self.stroke_handles = []
+        self.ui.matplot.canvas.ax.clear()
+        for i, t in enumerate(self.current_page.templates):
+            x,y = zip(*t.points)
+            h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
+            h.index = i;
+            self.stroke_handles.append(h)
+        self.ui.matplot.canvas.draw()
+        self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
+        self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
+        self.zoom_fun = zoom_factory(self.ui.matplot.canvas, self.max_xlim,
+                                         self.max_ylim, 1.5)
+
+    def load_raw_strokes_old(self):
         #self.labelFileName = '/home/david/Dropbox/Research/Data/PencaseDataFix/Pen006/Homework6-Problem1-text.iv'
         self.labelFileName = str(QFileDialog.getOpenFileName())
         if isfile(self.labelFileName):
@@ -110,7 +134,7 @@ class MainForm(QMainWindow):
                 h, = self.ui.matplot.canvas.ax.plot(x,y, 'k', picker=5)
                 h.index = i;
                 self.stroke_handles.append(h)
-                self.labels.append('NO LABEL')
+                self.current_page.labels.append('NO LABEL')
             self.ui.matplot.canvas.draw()
             self.max_xlim = self.ui.matplot.canvas.ax.get_xlim()
             self.max_ylim = self.ui.matplot.canvas.ax.get_ylim()
@@ -135,21 +159,27 @@ class MainForm(QMainWindow):
     def save_labels(self):
         dir_name = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         if isdir(dir_name):
-            base_dir = os.path.join(dir_name, self.pen)
+            base_dir = os.path.join(dir_name, self.current_page.pen)
             if not os.path.exists(base_dir):
                 os.makedirs(base_dir)
-            out_base = os.path.join(base_dir, self.file_name)
-            
-            label_out = str(len(self.labels)) + '\n' + '\n'.join(self.labels)
+            out_base = os.path.join(base_dir, self.current_page.filename_base)
+            print out_base
+            label_out = str(len(self.current_page.labels)) + '\n' + \
+                        '\n'.join(self.current_page.labels)
             label_file = out_base + '.lbl'
-            groups = grouping.sparse_groups_to_groups(self.groupings,
-                                                          self.num_temps)
+            print label_file
+            groups = grouping.sparse_groups_to_groups(self.current_page.groups,
+                                                          self.current_page.num_temps)
             groups_out = str(len(groups)) + '\n' + \
                          '\n'.join(['\t'.join(map(str, g)) for g in groups])
             groups_file = out_base + '.grp'
+            print groups_file
 
+            raw_file = out_base + '.iv'
+            print raw_file
             open(label_file, 'w').write(label_out)
             open(groups_file, 'w').write(groups_out)
+            shutil.copy(self.current_page.filename, raw_file)
             
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -216,9 +246,9 @@ class MainForm(QMainWindow):
     def label_strokes(self, label, bool_grouped):
         self.remove_from_groups(self.selected_strokes)
         if bool_grouped and len(self.selected_strokes) > 1:
-            self.groupings.append(self.selected_strokes)
+            self.current_page.groups.append(self.selected_strokes)
         for index in self.selected_strokes:
-            self.labels[index] = label
+            self.current_page.labels[index] = label
         for i in range(self.ui.labelList.count()):
             if str(self.ui.labelList.item(i).text()) == label:
                 item = self.ui.labelList.takeItem(i)
@@ -229,22 +259,22 @@ class MainForm(QMainWindow):
 
     def remove_from_groups(self, new_group):
         for index in new_group:
-            for group in self.groupings:
+            for group in self.current_page.groups:
                 if index in group:
                     for g in group:
-                        self.labels[g] = "NO LABEL"
-                    self.groupings.remove(group)
+                        self.current_page.labels[g] = "NO LABEL"
+                    self.current_page.groups.remove(group)
         
     def color_strokes(self):
         handles = self.stroke_handles
-        for i, label in enumerate(self.labels):
+        for i, label in enumerate(self.current_page.labels):
             if label == 'NO LABEL':
                 handles[i].set_color('k')
             else:
                 handles[i].set_color('r')
         colors = ['g', 'b', 'c', 'm']
         j = 0
-        for group in self.groupings:
+        for group in self.current_page.groups:
             for i in group:
                 handles[i].set_color(colors[j % len(colors)])
             j += 1

@@ -3,16 +3,18 @@ from sklearn import tree
 from collections import namedtuple
 #from multiprocessing import Pool
 
-from sketchrec.imageio import load_all_label_files as load
 from sketchrec.image_template import multiple_to_image
 from sketchrec.image_template import list_classification
-from sketchrec.grouping import compute_features_equation
-from sketchrec.grouping import groups_to_join_graph
-from sketchrec.grouping import features_to_classifier_input
-from sketchrec.grouping import clf_results_to_join_graph
+from sketchrec.grouping import (compute_features_equation,
+                                groups_to_join_graph,
+                                features_to_classifier_input,
+                                clf_results_to_join_graph,
+                                group_image_templates)
+from sketchrec.pagedata import load_all_page_data
 
-template_base = '/home/david/Dropbox/Research/Data/PencaseDataFix/'
+#template_base = '/home/david/Dropbox/Research/Data/PencaseDataFix/'
 label_base = '/home/david/Dropbox/Research/Data/PenCaseLabels/'
+base_directory = label_base
 
 FileInfo = namedtuple('fileinfo', ['pen', 'filename', 'templates', 'groups', 
                                    'labels', 'join_graph', 'imagetemps',    
@@ -22,16 +24,13 @@ FileInfo = namedtuple('fileinfo', ['pen', 'filename', 'templates', 'groups',
 # Ensemble schemes
 
 def ensemble_rec():
-    raw_files = load(template_base, label_base)
     print "Building data"
-    pages = build_data(raw_files)
+    pages = load_pages(base_directory)
     
     accuracies = []
     for i in range(len(pages)):
         test = pages[0]
         train = pages[1:]
-
-        num_temps = len(getattr(test, 'templates'))
 
         print i, "Grouping"
         group_clf = grouping_classifier(train, tree.DecisionTreeClassifier)
@@ -39,16 +38,16 @@ def ensemble_rec():
                                                   
         print i, "Classifiying"
         train_images = [image for page in train 
-                        for image in getattr(page, 'imagetemps')
+                        for image in page.image_templates
                         if image.name != "NO LABEL"]
         grouped_labels = [list_classification(t, train_images)
                           for t in grouped_test]
 
-        predicted_labels = distribute_labels(getattr(test, 'groups'),
+        predicted_labels = distribute_labels(test.groups,
                                              grouped_labels,
-                                             num_temps)
+                                             test.num_temps)
         
-        real_labels = getattr(test, 'labels')
+        real_labels = test.labels
 
         #for a, b, in zip(predicted_labels, real_labels):
         #    print a, b
@@ -56,54 +55,45 @@ def ensemble_rec():
         num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
                             else 0.0
                             for i in range(len(real_labels))])
-        accuracies.append([num_right/num_temps, g_acc])
+        accuracies.append([num_right/test.num_temps, g_acc])
         pages = pages[1:] + pages[:1]
 
     return accuracies
 
 def character_rec(dim):
-    raw_files = load(template_base, label_base)
     print "Building data"
-    pages = build_data(raw_files, dim)
+    pages = load_pages(base_directory)
     
     accuracies = []
     for i in range(len(pages)):
         test = pages[0]
         train = pages[1:]
         
-        num_temps = len(getattr(test, 'templates'))               
         print i, "Classifiying"
         train_images = [image for page in train 
-                        for image in getattr(page, 'imagetemps')
+                        for image in page.image_templates
                         if image.name != "NO LABEL"]
         grouped_labels = [list_classification(t, train_images)
-                          for t in getattr(test, 'imagetemps')]
+                          for t in test.image_templates]
         
         #grouped_labels = map(lambda t: 
         #                     list_classification(t, train_images),
         #                     getattr(test, 'imagetemps'))
-        predicted_labels = distribute_labels(getattr(test, 'groups'),
+        predicted_labels = distribute_labels(test.groups,
                                              grouped_labels,
-                                             num_temps)
+                                             test.num_temps)
         
-        real_labels = getattr(test, 'labels')
+        real_labels = test.labels
         
         num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
                             else 0.0
                             for i in range(len(real_labels))])
-        accuracies.append(num_right/num_temps)
+        accuracies.append(num_right/test.num_temps)
         pages = pages[1:] + pages[:1]
         
     return accuracies
 
 # Utilites
-def group_image_templates(templates, groups, dim=48):
-    grouped = []
-    for group in groups:
-        t_group = [templates[i] for i in group]
-        grouped.append(multiple_to_image(t_group, dim))
-    return grouped
-                        
 def distribute_labels(groups, labels, num_temps):
     dist_labels = ['dummy' for i in range(num_temps)]
     for group, label in zip(groups, labels):
@@ -111,49 +101,35 @@ def distribute_labels(groups, labels, num_temps):
             dist_labels[i] = label
     return dist_labels
         
-
-def build_data(raw_files, dim=48):
+def load_pages(base_dir, dim=48):
     """ 
     Takes the raw files and computes image templates, join_graphs, features.
     """
-    pages = []
-    for f in raw_files:
-        labels = f[4]
-        for i, temp in enumerate(f[2]):
-            temp.name = labels[i]
-        #print "Building file ", f[0], f[1], len(f[2])
-        join_graph = groups_to_join_graph(f[3])
-        image_temps = group_image_templates(f[2], f[3], dim)
-        raw_features = compute_features_equation(f[2])
-        (g_features, g_labels) = features_to_classifier_input(raw_features, 
-                                                              join_graph)
-        tup = f + (join_graph, image_temps, raw_features, 
-                   g_features, g_labels)
-        pages.append(FileInfo(*tup))
+    pages = load_all_page_data(base_directory)
+    [page.compute_recognition_data(dim) for page in pages]
     return pages
     
-
 def grouping_classifier(train, clf_type):
     X = [f for page in train 
-         for f in getattr(page, 'grouping_features') ]
+         for f in page.group_features]
     y = [f for page in train 
-         for f in getattr(page, 'grouping_labels')]
+         for f in page.group_labels]
 
     clf = clf_type()
     clf = clf.fit(np.array(X), np.array(y))
     return clf
 
 def group_classify(page, clf):
-    features = getattr(page, 'grouping_features')
+    features = page.group_features
     
     y = clf.predict(features)
-    real = getattr(page, 'grouping_labels')
+    real = page.group_labels
     accuracy = sum([1.0 if r == p else 0.0
                     for r,p in zip(real, y)])/len(y)
-    groups = clf_results_to_join_graph(getattr(page, 'raw_grouping_features'),
+    groups = clf_results_to_join_graph(page.raw_features,
                                        y, 
-                                       len(getattr(page, 'templates')))
-    return (accuracy, group_image_templates(getattr(page, 'templates'),
+                                       page.num_temps)
+    return (accuracy, group_image_templates(page.templates,
                                             groups))
     
 

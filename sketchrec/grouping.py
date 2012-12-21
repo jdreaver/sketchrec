@@ -7,7 +7,8 @@ different data structures.
 import numpy as np
 from collections import defaultdict
 
-from utilities import *
+from sketchrec.utilities import *
+from sketchrec.image_template import multiple_to_image
 
 def equation_lines(templates, bounding_boxes=None):
     
@@ -267,4 +268,11 @@ def clf_results_to_join_graph(raw_features, results, num_temps):
             join_graph[i] = sorted(join_graph[i] + join_graph[j])
     return join_graph_to_groups(join_graph)
 
+def group_image_templates(templates, groups, dim=48):
+    """Joins strokes and computes image templates."""
+    grouped = []
+    for group in groups:
+        t_group = [templates[i] for i in group]
+        grouped.append(multiple_to_image(t_group, dim))
+    return grouped
 
