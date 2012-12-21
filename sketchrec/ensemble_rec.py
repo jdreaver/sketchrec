@@ -76,6 +76,9 @@ def character_rec(dim):
                             else 0.0
                             for i in range(len(real_labels))])
         accuracies.append(num_right/test.num_temps)
+
+        # accuracies.append(compute_label_accuracy(predicted_labels,
+        #                                          real_labels))
         pages = pages[1:] + pages[:1]
         
     return accuracies
@@ -118,7 +121,30 @@ def group_classify(page, clf):
                                        page.num_temps)
     return (accuracy, group_image_templates(page.templates,
                                             groups))
+
+# Label equivalence
+label_equivalence_groups = [('C', 'cc'), ('I', 'ii'), ('J', 'jj'),
+                            ('K', 'kk'), ('M', 'mm'),
+                            ('O', 'oo', '0', 'circle', 'theta', 'degree'),
+                            ('P', 'pp'), ('S', 'ss'), ('V', 'vv'),
+                            ('W', 'ww'), ('X', 'xx'), ('Y', 'yy'),
+                            ('Z', 'zz'), ('box', 'squigglebox'),
+                            ('minus', 'hline'), ('dot', 'decimal')]
+
+label_equivalence = {}
+for group in label_equivalence_groups:
+    for i in range(len(group)):
+        label_equivalence[group[i]] = group[:i] + group[(i + 1):]
+
+def compute_label_accuracy(labels, real_labels):
     
+    num_right = np.sum([1.0 if labels[i] == real_labels[i]
+                        or (labels[i] in label_equivalence.keys()
+                            and real_labels[i] in label_equivalence[labels[i]])
+                        else 0.0
+    for i in range(len(real_labels))])
+
+    return num_right/len(labels)
 
 if __name__ == '__main__':
 
