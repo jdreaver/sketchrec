@@ -12,14 +12,7 @@ from sketchrec.grouping import (compute_features_equation,
                                 group_image_templates)
 from sketchrec.pagedata import load_all_page_data
 
-#template_base = '/home/david/Dropbox/Research/Data/PencaseDataFix/'
-label_base = '/home/david/Dropbox/Research/Data/PenCaseLabels/'
-base_directory = label_base
-
-FileInfo = namedtuple('fileinfo', ['pen', 'filename', 'templates', 'groups', 
-                                   'labels', 'join_graph', 'imagetemps',    
-                                   'raw_grouping_features', 
-                                   'grouping_features', 'grouping_labels'])
+base_directory = '/home/david/Dropbox/Research/Data/PenCaseLabels/'
                              
 # Ensemble schemes
 
@@ -49,9 +42,6 @@ def ensemble_rec():
         
         real_labels = test.labels
 
-        #for a, b, in zip(predicted_labels, real_labels):
-        #    print a, b
-        #print predicted_labels, grouped_labels
         num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
                             else 0.0
                             for i in range(len(real_labels))])
@@ -76,9 +66,6 @@ def character_rec(dim):
         grouped_labels = [list_classification(t, train_images)
                           for t in test.image_templates]
         
-        #grouped_labels = map(lambda t: 
-        #                     list_classification(t, train_images),
-        #                     getattr(test, 'imagetemps'))
         predicted_labels = distribute_labels(test.groups,
                                              grouped_labels,
                                              test.num_temps)
@@ -134,7 +121,5 @@ def group_classify(page, clf):
     
 
 if __name__ == '__main__':
-    #template_base = '../../Data/PencaseDataFix/'
-    #label_base = '../../Data/PenCaseLabels/'
-    
+
     ensemble_rec()
