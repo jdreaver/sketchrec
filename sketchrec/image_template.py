@@ -116,7 +116,7 @@ def list_classification(unknown, training):
     unknown -- template to be recognized
     training -- list of known templates
     """
-    min_dist = (1.0, 'ERROR')
+    min_dist = (1.0 * 1.4142 * unknown.dimension + 1.0, 'ERROR')
     for temp in training:
         dist = max(
             np.sum(unknown.flat_map.take(temp.flat_points))/temp.num_r_points,
