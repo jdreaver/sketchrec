@@ -4,6 +4,7 @@
 *.lprof
 *.prof
 \.#*
+*_flymake
 
 # Packages
 *.egg
