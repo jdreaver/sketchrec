@@ -108,11 +108,6 @@ def full_upsample(old_points):
             i += 1
         i += 1
 
-    # Remove duplicates whilst preserving order
-    seen = set()
-    points = [p for p in points if tuple(p) not in seen
-              and not seen.add(tuple(p))]
-    
     return np.array(points)
     
 def distance_map(points, dim=48, resample=True):
@@ -136,6 +131,11 @@ def distance_map(points, dim=48, resample=True):
         inflated = inflate_points(centered, dim)
         if resample:
             inflated = full_upsample(inflated)
+    # Remove duplicates whilst preserving order
+    seen = set()
+    inflated = np.array([p for p in inflated if tuple(p) not in seen
+                         and not seen.add(tuple(p))])
+    
     grid = np.zeros([dim, dim])
     for point in inflated:
         grid[point[0], point[1]] = 1
