@@ -25,6 +25,10 @@ def upsample_tests():
                           [[ 1, 1], [1, 2], [2, 3], [3, 4], [2, 4],
                            [1, 4], [0, 4], [0, 3], [0, 2], [0, 1],
                            [0, 0], [-1, -1], [-2, -2], [-3, -3]])
+    # Test removing duplicate points
+    duplicate_points = np.array(([0, 0], [2, 2], [0, 0]))
+    assert np.array_equal(image_template.full_upsample(duplicate_points),
+                          [[0, 0], [1, 1], [2, 2]])
 
 def conversion_tests():
     t = template.Template(dubs)

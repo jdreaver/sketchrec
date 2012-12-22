@@ -78,12 +78,22 @@ def inflate_points(points, dim=48):
             np.dot(np.diag([inflation]*2), point), moved)).astype(int)
 
 def full_upsample(old_points):
+
+    """
+    Takes a set of integer-valued points and connects each consecutive
+    point by integer-valued jumps. For example:
+    points = [[0, 0], [2, 2]]
+    full_upsample(points) => [[0,0], [1,1], [2,2]]
+    """
+    
     points = list(old_points[:])
     i = 1
     while i < len(points):
         (dx, dy) = points[i] - points[i - 1]
         (absx, absy) = (abs(dx), abs(dy))
         (sign_x, sign_y) = (np.sign(dx), np.sign(dy))
+        # Insert points until there is no longer a gap between the
+        # original points
         while absx > 1 or absy > 1:
             if absx > absy:
                 points.insert(i, points[i - 1] + np.array(([sign_x, 0])))
@@ -98,17 +108,13 @@ def full_upsample(old_points):
             i += 1
         i += 1
 
-    # Remove duplicates
-    # i = 1
-    # while i < len(points):
-    #     for j in range(i + 1):
-    #         if np.array_equal(points[i], points[j]):
-    #             points.pop(i)
-    #             i -= 1
-    #     i += 1
+    # Remove duplicates whilst preserving order
+    seen = set()
+    points = [p for p in points if tuple(p) not in seen
+              and not seen.add(tuple(p))]
     
     return np.array(points)
-
+    
 def distance_map(points, dim=48, resample=True):
     
     """
