@@ -50,11 +50,13 @@ def ensemble_rec():
 
     return accuracies
 
-def character_rec(dim):
+def character_rec(dim=48, resample=True):
     print "Building data"
-    pages = load_pages(base_directory)
+    pages = load_pages(base_directory, dim=dim, resample=resample)
     
     accuracies = []
+    total_temps = 0.0
+    total_right = 0.0
     for i in range(len(pages)):
         test = pages[0]
         train = pages[1:]
@@ -76,12 +78,14 @@ def character_rec(dim):
                             else 0.0
                             for i in range(len(real_labels))])
         accuracies.append(num_right/test.num_temps)
-
+        total_temps += test.num_temps
+        total_right += num_right
         # accuracies.append(compute_label_accuracy(predicted_labels,
         #                                          real_labels))
         pages = pages[1:] + pages[:1]
-        
-    return accuracies
+
+    avg_accuracy = total_right/total_temps
+    return (accuracies, avg_accuracy)
 
 # Utilites
 def distribute_labels(groups, labels, num_temps):
@@ -91,12 +95,12 @@ def distribute_labels(groups, labels, num_temps):
             dist_labels[i] = label
     return dist_labels
         
-def load_pages(base_dir, dim=48):
+def load_pages(base_dir, dim=48, resample=True):
     """ 
     Takes the raw files and computes image templates, join_graphs, features.
     """
     pages = load_all_page_data(base_directory)
-    [page.compute_recognition_data(dim) for page in pages]
+    [page.compute_recognition_data(dim=dim, resample=resample) for page in pages]
     return pages
     
 def grouping_classifier(train, clf_type):

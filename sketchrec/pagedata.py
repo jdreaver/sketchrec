@@ -25,19 +25,20 @@ class PageData():
         self.pen = os.path.split(os.path.dirname(filename))[1]
         self.num_temps = len(self.templates)
 
-    def compute_recognition_data(self, dim=48):
+    def compute_recognition_data(self, dim=48, resample=True):
         # Assign labels to actual template data structure.
         for i, temp in enumerate(self.templates):
             temp.name = self.labels[i]
         self.join_graph = groups_to_join_graph(self.groups)
         self.image_templates = group_image_templates(self.templates,
-                                                     self.groups, dim)
+                                                     self.groups, dim=dim,
+                                                     resample=resample)
         self.raw_features = compute_features_equation(self.templates)
         (self.group_features, self.group_labels) = features_to_classifier_input(
             self.raw_features, self.join_graph)
         
 
-def load_all_page_data(base_directory):
+def load_all_page_data(base_directory, dim=48, resample=True):
 
     """
     Returns all labeled files in database.

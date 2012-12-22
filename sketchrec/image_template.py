@@ -20,9 +20,9 @@ class ImageTemplate(Template):
     flattened so the hausdorff distances can be more easily computed.
     """
     
-    def __init__(self, strokes, name="NO LABEL", timestamps = None, dim=48):
+    def __init__(self, strokes, name="NO LABEL", timestamps = None, dim=48, resample=True):
         points = np.array([point  for stroke in strokes for point in stroke])
-        (grid, dmap, r_points) = distance_map(points, dim)
+        (grid, dmap, r_points) = distance_map(points, dim, resample)
         self.grid = grid
         self.distance_map = dmap
         self.rasterized_points = r_points
@@ -42,7 +42,7 @@ def convert_to_image(template, dim = 48):
     return ImageTemplate(template.strokes, template.name, 
                          template.timestamps, dim)
 
-def multiple_to_image(templates, dim = 48):
+def multiple_to_image(templates, dim=48, resample=True):
     
     """
     Combines the strokes and timestamps of multiple templates into
@@ -53,7 +53,7 @@ def multiple_to_image(templates, dim = 48):
                          templates[0].name, 
                          [stamp for t in templates for stamp
                           in t.timestamps],
-                         dim)
+                         dim=dim, resample=resample)
 
 # ImageTemplate initialization functions.
 
@@ -77,7 +77,39 @@ def inflate_points(points, dim=48):
     return np.array(map(lambda point: 
             np.dot(np.diag([inflation]*2), point), moved)).astype(int)
 
-def distance_map(points, dim=48):
+def full_upsample(old_points):
+    points = list(old_points[:])
+    i = 1
+    while i < len(points):
+        (dx, dy) = points[i] - points[i - 1]
+        (absx, absy) = (abs(dx), abs(dy))
+        (sign_x, sign_y) = (np.sign(dx), np.sign(dy))
+        while absx > 1 or absy > 1:
+            if absx > absy:
+                points.insert(i, points[i - 1] + np.array(([sign_x, 0])))
+                absx -= 1
+            elif absx < absy:
+                points.insert(i, points[i - 1] + np.array(([0, sign_y])))
+                absy -= 1
+            else:
+                points.insert(i, points[i - 1] + np.array(([sign_x, sign_y])))
+                absx -= 1
+                absy -= 1
+            i += 1
+        i += 1
+
+    # Remove duplicates
+    # i = 1
+    # while i < len(points):
+    #     for j in range(i + 1):
+    #         if np.array_equal(points[i], points[j]):
+    #             points.pop(i)
+    #             i -= 1
+    #     i += 1
+    
+    return np.array(points)
+
+def distance_map(points, dim=48, resample=True):
     
     """
     Computes the distance map given the raw points of a template.
@@ -96,9 +128,17 @@ def distance_map(points, dim=48):
     else:
         centered = points - np.mean(points, axis=0) + np.array([24, 24])
         inflated = inflate_points(centered, dim)
+        if resample:
+            inflated = full_upsample(inflated)
     grid = np.zeros([dim, dim])
     for point in inflated:
         grid[point[0], point[1]] = 1
+    # except IndexError:
+    #     print "into: " + repr(into)
+    #     print "\npoints: \n" + repr(points)
+    #     print "\ncentered: \n" + repr(centered)
+    #     print "\ninflated: \n" + repr(inflated)
+    #     raise SystemExit
     dist_map = ndimage.morphology.distance_transform_edt(1 - grid)
     return (grid, dist_map, inflated.astype(int))
         

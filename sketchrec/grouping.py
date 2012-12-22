@@ -268,11 +268,11 @@ def clf_results_to_join_graph(raw_features, results, num_temps):
             join_graph[i] = sorted(join_graph[i] + join_graph[j])
     return join_graph_to_groups(join_graph)
 
-def group_image_templates(templates, groups, dim=48):
+def group_image_templates(templates, groups, dim=48, resample=True):
     """Joins strokes and computes image templates."""
     grouped = []
     for group in groups:
         t_group = [templates[i] for i in group]
-        grouped.append(multiple_to_image(t_group, dim))
+        grouped.append(multiple_to_image(t_group, dim=dim, resample=resample))
     return grouped
 
