@@ -151,6 +151,7 @@ def distance_map(points, dim=48, resample=True):
 # Distance functions
 
 def list_classification(unknown, training):
+    
     """ 
     Return closest training template using MHD.
 
@@ -162,6 +163,7 @@ def list_classification(unknown, training):
     unknown -- template to be recognized
     training -- list of known templates
     """
+    
     min_dist = (1.0 * 1.4142 * unknown.dimension + 1.0, 'ERROR')
     for temp in training:
         dist = max(

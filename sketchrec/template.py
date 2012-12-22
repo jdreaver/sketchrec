@@ -15,6 +15,3 @@ class Template(object):
 
     def has_time_stamps(self):
         return self.timestamps is None
-        
-
-        
