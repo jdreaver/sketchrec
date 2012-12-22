@@ -12,6 +12,7 @@ class PageData():
     """Class for holding data from one page of work."""
     
     def __init__(self, filename, labeled=False):
+        self.labeled = labeled
         self.groups = self.labels = self.templates = []
         self.filename = filename
         self.filename_base = os.path.splitext(os.path.basename(filename))[0]

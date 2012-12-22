@@ -20,7 +20,7 @@ class ImageTemplate(Template):
     flattened so the hausdorff distances can be more easily computed.
     """
     
-    def __init__(self, strokes, name="NO LABEL", timestamps = None, dim=48, resample=True):
+    def __init__(self, strokes, name="NO LABEL", timestamps=None, dim=48, resample=True):
         points = np.array([point  for stroke in strokes for point in stroke])
         (grid, dmap, r_points) = distance_map(points, dim, resample)
         self.grid = grid

@@ -18,6 +18,7 @@ temp_dim = image_template.ImageTemplate(dubs, dim=5)
 def inheritance_tests():
     assert temp_s.is_single_stroke() == True
     assert temp_d.is_single_stroke() == False
+    assert np.array_equal(temp_s.timestamps, np.array(None))
 
 def upsample_tests():
     test_points = np.array(([1,1], [3,4], [0, 4], [-3, -3]))

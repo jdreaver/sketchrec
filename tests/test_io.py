@@ -29,10 +29,16 @@ def page_data_labeled_load_tests():
     assert pages[0].pen == 'Pen005'
     assert pages[0].filename == 'tests/testlabels/Pen005/Homework6-Problem1-text'
 
+    pages[0].compute_recognition_data()
+    for temp, label in zip(pages[0].templates, pages[0].labels):
+        assert temp.name == label
+    
+
 def page_data_unlabeled_load_tests():
     page = PageData(temp_file, labeled=False)
     assert len(page.templates) == 223
     for i in range(len(page.templates)):
         assert page.labels[i] == 'NO LABEL'
     assert page.pen == 'Pen005'
+    
      
