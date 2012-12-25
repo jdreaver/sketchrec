@@ -21,7 +21,7 @@ def ensemble_rec():
     pages = load_pages(base_directory)
     
     accuracies = []
-    for i, (test, train) in holdout(pages):
+    for i, (test, train) in enumerate(holdout(pages)):
         print i, "Grouping"
         group_clf = create_grouping_classifier(train, tree.DecisionTreeClassifier)
         (g_acc, grouped_test) = group_classify(test, group_clf)
@@ -53,7 +53,7 @@ def character_rec(dim=48, resample=True):
     accuracies = []
     total_temps = 0.0
     total_right = 0.0
-    for i, (test, train) in holdout(pages):
+    for i, (test, train) in enumerate(holdout(pages)):
         print i, "Classifiying"
         train_images = [image for page in train 
                         for image in page.image_templates
@@ -67,14 +67,14 @@ def character_rec(dim=48, resample=True):
         
         real_labels = test.labels
         
-        num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
-                            else 0.0
-                            for i in range(len(real_labels))])
-        accuracies.append(num_right/test.num_temps)
+        # num_right = np.sum([1.0 if predicted_labels[i] == real_labels[i]
+        #                     else 0.0
+        #                     for i in range(len(real_labels))])
+        # accuracies.append(num_right/test.num_temps)
+        num_right = num_correct_labels(predicted_labels, real_labels)
         total_temps += test.num_temps
         total_right += num_right
-        # accuracies.append(compute_label_accuracy(predicted_labels,
-        #                                          real_labels))
+        accuracies.append(num_right/len(test.labels))
     avg_accuracy = total_right/total_temps
     return (accuracies, avg_accuracy)
 
@@ -136,15 +136,14 @@ def distribute_labels(groups, labels, num_temps):
             dist_labels[i] = label
     return dist_labels
 
-def compute_label_accuracy(labels, real_labels):
+def num_correct_labels(labels, real_labels):
     
     num_right = np.sum([1.0 if labels[i] == real_labels[i]
                         or (labels[i] in label_equivalence.keys()
                             and real_labels[i] in label_equivalence[labels[i]])
-                        else 0.0
-    for i in range(len(real_labels))])
+                        else 0.0 for i in range(len(real_labels))])
 
-    return num_right/len(labels)
+    return num_right
 
 if __name__ == '__main__':
 
