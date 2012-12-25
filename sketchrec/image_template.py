@@ -174,6 +174,13 @@ def list_classification(unknown, training):
     min_dist = (min_dist[0] / (1.4142 * unknown.dimension), min_dist[1])
     return min_dist[1]
 
+def modified_haussdorff_distance(template_a, template_b):
+    raw =  max(
+            np.sum(template_a.flat_map.take(template_b.flat_points))/template_b.num_r_points,
+            np.sum(template_b.flat_map.take(template_a.flat_points))/template_a.num_r_points
+            )
+    return raw / (1.4142 * template_a.dimension)
+
 def group_centroid(templates):
     points = []
     [points.extend(template.points) for template in templates]
