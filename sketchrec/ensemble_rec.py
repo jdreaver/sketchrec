@@ -21,12 +21,9 @@ def ensemble_rec():
     pages = load_pages(base_directory)
     
     accuracies = []
-    for i in range(len(pages)):
-        test = pages[0]
-        train = pages[1:]
-
+    for i, (test, train) in holdout(pages):
         print i, "Grouping"
-        group_clf = grouping_classifier(train, tree.DecisionTreeClassifier)
+        group_clf = create_grouping_classifier(train, tree.DecisionTreeClassifier)
         (g_acc, grouped_test) = group_classify(test, group_clf)
                                                   
         print i, "Classifiying"
@@ -46,7 +43,6 @@ def ensemble_rec():
                             else 0.0
                             for i in range(len(real_labels))])
         accuracies.append([num_right/test.num_temps, g_acc])
-        pages = pages[1:] + pages[:1]
 
     return accuracies
 
@@ -57,10 +53,7 @@ def character_rec(dim=48, resample=True):
     accuracies = []
     total_temps = 0.0
     total_right = 0.0
-    for i in range(len(pages)):
-        test = pages[0]
-        train = pages[1:]
-        
+    for i, (test, train) in holdout(pages):
         print i, "Classifiying"
         train_images = [image for page in train 
                         for image in page.image_templates
@@ -82,18 +75,13 @@ def character_rec(dim=48, resample=True):
         total_right += num_right
         # accuracies.append(compute_label_accuracy(predicted_labels,
         #                                          real_labels))
-        pages = pages[1:] + pages[:1]
-
     avg_accuracy = total_right/total_temps
     return (accuracies, avg_accuracy)
 
 # Utilites
-def distribute_labels(groups, labels, num_temps):
-    dist_labels = ['dummy' for i in range(num_temps)]
-    for group, label in zip(groups, labels):
-        for i in group:
-            dist_labels[i] = label
-    return dist_labels
+def holdout(items):
+    for i in range(len(items)):
+        yield (items[i], items[:i] + items[(i + 1):])
         
 def load_pages(base_dir, dim=48, resample=True):
     """ 
@@ -102,8 +90,9 @@ def load_pages(base_dir, dim=48, resample=True):
     pages = load_all_page_data(base_directory)
     [page.compute_recognition_data(dim=dim, resample=resample) for page in pages]
     return pages
-    
-def grouping_classifier(train, clf_type):
+
+# Grouping uitilites
+def create_grouping_classifier(train, clf_type):
     X = [f for page in train 
          for f in page.group_features]
     y = [f for page in train 
@@ -126,7 +115,7 @@ def group_classify(page, clf):
     return (accuracy, group_image_templates(page.templates,
                                             groups))
 
-# Label equivalence
+# Label Utilites
 label_equivalence_groups = [('C', 'cc'), ('I', 'ii'), ('J', 'jj'),
                             ('K', 'kk'), ('M', 'mm'),
                             ('O', 'oo', '0', 'circle', 'theta', 'degree'),
@@ -139,6 +128,13 @@ label_equivalence = {}
 for group in label_equivalence_groups:
     for i in range(len(group)):
         label_equivalence[group[i]] = group[:i] + group[(i + 1):]
+
+def distribute_labels(groups, labels, num_temps):
+    dist_labels = ['dummy' for i in range(num_temps)]
+    for group, label in zip(groups, labels):
+        for i in group:
+            dist_labels[i] = label
+    return dist_labels
 
 def compute_label_accuracy(labels, real_labels):
     
