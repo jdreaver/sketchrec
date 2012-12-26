@@ -1,4 +1,4 @@
-from sketchrec import image_template, template
+from sketchrec import image_template, template, pagedata
 import numpy as np
 
 degen1 = [[[1,-1]]]
@@ -13,6 +13,10 @@ temp_s.name = "temp_s"
 temp_d = image_template.ImageTemplate(dubs, dim=6)
 
 temp_dim = image_template.ImageTemplate(dubs, dim=5)
+
+page_path = 'tests/testlabels/Pen005/Homework6-Problem1-text'
+page = pagedata.PageData(page_path, labeled=True)
+page.compute_recognition_data()
     
 
 def inheritance_tests():
@@ -49,5 +53,8 @@ def distances_tests():
     haus = image_template.modified_hausdorff_distance
     assert abs(haus(temp_s, temp_d) - 0.0673441488) < 0.0001
     assert image_template.list_classification(temp_s, [temp_d, temp_s])[0] == "temp_s"
-    
+    test = page.image_templates[0]
+    train = page.image_templates[1:50]
+    assert image_template.list_classification_old(test, train) == \
+           image_template.list_classification(test, train)
     

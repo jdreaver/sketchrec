@@ -171,8 +171,8 @@ def list_classification_old(unknown, training):
             np.sum(temp.flat_map.take(unknown.flat_points))/unknown.num_r_points
             )
         min_dist = min([min_dist, (dist, temp.name)])
-    min_dist = (min_dist[0] / (1.4142 * unknown.dimension), min_dist[1])
-    return min_dist[1]
+    min_dist = (min_dist[1], min_dist[0] / (1.4142 * unknown.dimension))
+    return min_dist
 
 def modified_hausdorff_distance(template_a, template_b):
     raw =  max(
@@ -187,7 +187,7 @@ def stack_distance_maps(templates):
     N by dim^2 numpy array.
     """
 
-    return np.vstack([temp.flat_map for temp in templates])
+    return np.vstack((temp.flat_map for temp in templates))
 
 def haus_map_iterator(flat_map, points):
     return np.sum(flat_map.take(points))/len(points)
@@ -198,7 +198,7 @@ def vec_list_haus(template, train):
                           axis=1)/len(template.flat_points)
     d_train_temp = np.array([haus_map_iterator(template.flat_map, temp.flat_points) 
                             for temp in train])
-    return np.maximum(d_temp_train, d_train_temp)/template.dimension
+    return np.maximum(d_temp_train, d_train_temp)/(1.4142 * template.dimension)
     
 def list_classification(template, train):
     haus_distances = vec_list_haus(template, train)
