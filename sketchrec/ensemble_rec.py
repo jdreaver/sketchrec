@@ -30,7 +30,7 @@ def ensemble_rec():
         train_images = [image for page in train 
                         for image in page.image_templates
                         if image.name != "NO LABEL"]
-        grouped_labels = [list_classification(t, train_images)
+        grouped_labels = [list_classification(t, train_images)[0]
                           for t in grouped_test]
 
         predicted_labels = distribute_labels(test.groups,
@@ -58,7 +58,7 @@ def character_rec(dim=48, resample=True):
         train_images = [image for page in train 
                         for image in page.image_templates
                         if image.name != "NO LABEL"]
-        grouped_labels = [list_classification(t, train_images)
+        grouped_labels = [list_classification(t, train_images)[0]
                           for t in test.image_templates]
         
         predicted_labels = distribute_labels(test.groups,

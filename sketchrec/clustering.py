@@ -4,6 +4,7 @@ of templates.
 """
 
 import numpy as np
+from sketchrec.image_template import stack_distance_maps
 
 def distance_matrix_1(items, distance_fn):
     N = len(items)
@@ -12,12 +13,6 @@ def distance_matrix_1(items, distance_fn):
         for j in range(i + 1, N):
             d = distance_fn(items[i], items[j])
             distances[i,j] = distances[j,i] = d
-    return distances
-
-def distance_matrix_2(items, distance_fn):
-    N = len(items)
-    distances = map(lambda i, j: distance_fn[items[i], items[j]],
-                    np.zeros((N,N)))
     return distances
 
 def distance_matrix_3(items, distance_fn):

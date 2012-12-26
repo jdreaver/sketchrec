@@ -150,7 +150,7 @@ def distance_map(points, dim=48, resample=True):
         
 # Distance functions
 
-def list_classification(unknown, training):
+def list_classification_old(unknown, training):
     
     """ 
     Return closest training template using MHD.
@@ -174,12 +174,36 @@ def list_classification(unknown, training):
     min_dist = (min_dist[0] / (1.4142 * unknown.dimension), min_dist[1])
     return min_dist[1]
 
-def modified_haussdorff_distance(template_a, template_b):
+def modified_hausdorff_distance(template_a, template_b):
     raw =  max(
             np.sum(template_a.flat_map.take(template_b.flat_points))/template_b.num_r_points,
             np.sum(template_b.flat_map.take(template_a.flat_points))/template_a.num_r_points
             )
     return raw / (1.4142 * template_a.dimension)
+
+def stack_distance_maps(templates):
+    """
+    Takes the flat distance maps (dim^2) of N matrices and returns and
+    N by dim^2 numpy array.
+    """
+
+    return np.vstack([temp.flat_map for temp in templates])
+
+def haus_map_iterator(flat_map, points):
+    return np.sum(flat_map.take(points))/len(points)
+
+def vec_list_haus(template, train):
+    map_stack = stack_distance_maps(train)
+    d_temp_train = np.sum(map_stack.take(template.flat_points, axis=1), 
+                          axis=1)/len(template.flat_points)
+    d_train_temp = np.array([haus_map_iterator(template.flat_map, temp.flat_points) 
+                            for temp in train])
+    return np.maximum(d_temp_train, d_train_temp)/template.dimension
+    
+def list_classification(template, train):
+    haus_distances = vec_list_haus(template, train)
+    index = np.argmin(haus_distances)
+    return (train[index].name, haus_distances[index])
 
 def group_centroid(templates):
     points = []

@@ -46,8 +46,8 @@ def basics_tests():
     
 
 def distances_tests():
-    hauss = image_template.modified_haussdorff_distance
-    assert abs(hauss(temp_s, temp_d) - 0.0673441488) < 0.0001
-    assert image_template.list_classification(temp_s, [temp_d, temp_s]) == "temp_s"
+    haus = image_template.modified_hausdorff_distance
+    assert abs(haus(temp_s, temp_d) - 0.0673441488) < 0.0001
+    assert image_template.list_classification(temp_s, [temp_d, temp_s])[0] == "temp_s"
     
     
