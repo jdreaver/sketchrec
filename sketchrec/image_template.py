@@ -139,18 +139,12 @@ def distance_map(points, dim=48, resample=True):
     grid = np.zeros([dim, dim])
     for point in inflated:
         grid[point[0], point[1]] = 1
-    # except IndexError:
-    #     print "into: " + repr(into)
-    #     print "\npoints: \n" + repr(points)
-    #     print "\ncentered: \n" + repr(centered)
-    #     print "\ninflated: \n" + repr(inflated)
-    #     raise SystemExit
     dist_map = ndimage.morphology.distance_transform_edt(1 - grid)
     return (grid, dist_map, inflated.astype(int))
         
-# Distance functions
+# Distance and recognition functions
 
-def list_classification_old(unknown, training):
+def list_classification(unknown, training):
     
     """ 
     Return closest training template using MHD.
@@ -174,6 +168,60 @@ def list_classification_old(unknown, training):
     min_dist = (min_dist[1], min_dist[0] / (1.4142 * unknown.dimension))
     return min_dist
 
+def list_classification_vec(template, train):
+    
+    """
+    Vectorized version of list_classification. DO NOT USE because
+    list_classification is faster.
+    """
+    
+    haus_distances = vectorized_list_haus(template, train)
+    index = np.argmin(haus_distances)
+    return (train[index].name, haus_distances[index])
+
+def vectorized_list_haus(template, train):
+    
+    """
+    Computes the modified hausdorff distance from template to every
+    template in train.
+    """
+    
+    map_stack = stack_distance_maps(train)
+    d_temp_train = np.sum(map_stack.take(template.flat_points, axis=1), 
+                          axis=1)/len(template.flat_points)
+    d_train_temp = np.array([haus_map_iterator(template.flat_map, temp.flat_points) 
+                            for temp in train])
+    return np.maximum(d_temp_train, d_train_temp)/(1.4142 * template.dimension)
+
+def vec_full_list_classification(test, train):
+    
+    """
+    Computes the closest training template for each template
+    in test and returns the distance and label.
+    """
+    
+    train_stack = stack_distance_maps(train)
+    test_stack = stack_distance_maps(test)
+    labels = [temp.name for temp in train]
+    dim = test[0].dimension
+
+    # Compute directed modified hausdorff distances
+    test_to_train = np.zeros((len(test), len(train)))
+    train_to_test = np.zeros((len(train), len(test)))
+    for i, temp in enumerate(test):
+        test_to_train[i] = np.sum(train_stack.take(temp.flat_points, axis=1), 
+                                  axis=1)/len(temp.flat_points)
+    for i, temp in enumerate(train):
+        train_to_test[i] = np.sum(test_stack.take(temp.flat_points, axis=1), 
+                                  axis=1)/len(temp.flat_points)
+
+    # Take the max of each directed distance, and the min of all maxes.
+    distances = np.maximum(test_to_train, train_to_test.T)
+    indices = np.argmin(distances, axis=1)
+    
+    return [(labels[index], distances[i][index]/(1.4142 * dim))
+            for i, index in enumerate(indices)]
+
 def modified_hausdorff_distance(template_a, template_b):
     raw =  max(
             np.sum(template_a.flat_map.take(template_b.flat_points))/template_b.num_r_points,
@@ -192,18 +240,20 @@ def stack_distance_maps(templates):
 def haus_map_iterator(flat_map, points):
     return np.sum(flat_map.take(points))/len(points)
 
-def vec_list_haus(template, train):
-    map_stack = stack_distance_maps(train)
-    d_temp_train = np.sum(map_stack.take(template.flat_points, axis=1), 
-                          axis=1)/len(template.flat_points)
-    d_train_temp = np.array([haus_map_iterator(template.flat_map, temp.flat_points) 
-                            for temp in train])
-    return np.maximum(d_temp_train, d_train_temp)/(1.4142 * template.dimension)
-    
-def list_classification(template, train):
-    haus_distances = vec_list_haus(template, train)
-    index = np.argmin(haus_distances)
-    return (train[index].name, haus_distances[index])
+def distance_matrix(templates):
+    """
+    Computes the modified hausdorff distance for a set of templates.
+    """ 
+    N = len(templates)
+    dim = templates[0].dimension
+    map_stack = stack_distance_maps(templates)
+    dist_matrix = np.zeros((N, N))
+    for i, temp in enumerate(templates):
+        dist_matrix[i] = np.sum(map_stack.take(temp.flat_points, axis=1), 
+                                  axis=1)/len(temp.flat_points)
+        
+    dist_matrix = np.maximum(dist_matrix, dist_matrix.T)
+    return dist_matrix/(1.4142 * dim)
 
 def group_centroid(templates):
     points = []
