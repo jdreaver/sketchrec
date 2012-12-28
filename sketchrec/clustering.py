@@ -24,4 +24,3 @@ def distance_matrix_3(items, distance_fn):
         distances[i] += row
     return distances + distances.T - np.diag(distances)
 
-
