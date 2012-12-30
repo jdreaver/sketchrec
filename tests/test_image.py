@@ -50,11 +50,17 @@ def basics_tests():
     
 
 def distances_tests():
+    HAUS_S_D = 0.0673441488
     haus = image_template.modified_hausdorff_distance
-    assert abs(haus(temp_s, temp_d) - 0.0673441488) < 0.0001
+    assert abs(haus(temp_s, temp_d) - HAUS_S_D) < 0.0001
     assert image_template.list_classification(temp_s, [temp_d, temp_s])[0] == "temp_s"
     test = page.image_templates[0]
     train = page.image_templates[1:50]
-    assert image_template.list_classification_old(test, train) == \
+    assert image_template.list_classification_vec(test, train) == \
            image_template.list_classification(test, train)
+
+    dist_matrix = image_template.distance_matrix([temp_s, temp_d, temp_s])
+    assert np.allclose(dist_matrix, np.array([[ 0.      , HAUS_S_D, 0.      ],
+                                              [ HAUS_S_D, 0.      , HAUS_S_D],
+                                              [ 0.      , HAUS_S_D, 0.      ]]))
     
